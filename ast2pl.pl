@@ -1,0 +1,47 @@
+use v5.16;
+use warnings;
+
+my %subs = (
+    'writeln' => 'say',
+);
+
+sub expr_to_str {
+    my $expr = $_[0];
+    $expr = [$expr] unless ref($$expr[0]);
+    my $res = '';
+    for my $elem (@$expr) {
+        if ($$elem[0] =~ 'num|op') {
+            $res .= $$elem[1];
+        } elsif ($$elem[0] eq 'var') {
+            $res .= '$' . $$elem[1];
+        } elsif ($$elem[0] eq 'brex') {
+            $res .= '(' . expr_to_str($$elem[1]) . ')';
+        } elsif ($$elem[0] eq 'call') {
+            $res .= call_to_str($elem);
+        } elsif (ref($$elem[1]) eq 'ARRAY') {
+            $res .= expr_to_str($elem);
+        } else {
+            die "unexpected expression element: " . encode_json($elem);
+        }
+    }
+    return $res;
+}
+
+sub call_to_str {
+    my $expr = $_[0];
+    my $res = $subs{$$expr[1]} // $$expr[1];
+    $res .= '(';
+    $res .= join(',', map {expr_to_str($_)} @{$$expr[2]});
+    return $res . ')';
+}
+
+sub to_pl {
+    my $res = '';
+    for my $st (@{$_[0]}) {
+        if ($$st[0] eq 'call') {
+            $res .= call_to_str($st);
+        }
+        $res .= ";\n";
+    }
+    return $res;
+}

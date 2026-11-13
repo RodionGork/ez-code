@@ -1,0 +1,5 @@
+writeln();
+  writeln(3);
+writeln(3,pow(5,2),8);
+writeln(3, 5,8);
+  writeln ( 3 ,5*(2+1+$y) ,8+2*$x ) ;
