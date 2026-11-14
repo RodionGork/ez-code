@@ -32,7 +32,11 @@ sub err {
 }
 
 sub p_space {
-    adv while peek =~ /\s/;
+    while (peek =~ /[\s#]/) {
+        if (adv eq '#') {
+            adv while peek ne "\n" && peek ne "\0";
+        }
+    }
 }
 
 sub p_word {

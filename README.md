@@ -15,10 +15,10 @@ completed / perfected to be suitable for any practial purpose.
 
 Like this:
 
-    perl main.pl sample0.ez
+    perl main.pl tests/t03-collatz.ez
 
-It will convert `sample0.ez` to perl source in-memory and execute it. If the
+It will convert `t03-collatz.ez` to perl source in-memory and execute it. If the
 output file parameter is added, result of conversion is not executed but
 rather written to that file:
 
-    perl main.pl sample0.ez result0.pl
+    perl main.pl tests/t03-collatz.ez collatz.pl

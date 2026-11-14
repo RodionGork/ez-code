@@ -1,3 +1,5 @@
+# testing functions with various number of arguments
+
 def newline(){
     writeln("");
 }

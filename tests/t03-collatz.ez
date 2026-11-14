@@ -1,3 +1,6 @@
+# practical problem - calculates number of steps in collatz congecture
+# sequence A006577 in the OEIS
+
 def collatz($n) {
     def $cnt = 0;
     while ($n > 1) {
