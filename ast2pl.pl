@@ -41,7 +41,7 @@ sub call_to_str {
 
 sub asgn_to_str {
     my $expr = $_[0];
-    return expr_to_str($$expr[1]) . '=' . expr_to_str($$expr[2]);
+    return expr_to_str($$expr[1]) . $$expr[2] . expr_to_str($$expr[3]);
 }
 
 sub def_to_str {

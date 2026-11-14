@@ -141,9 +141,16 @@ sub p_expr {
 sub p_asgn {
     my $tgt = p_lval;
     p_space;
-    err("expected '=' in assignment") unless adv eq '=';
+    my $op = adv;
+    if ($op ne '=') {
+        if ($op =~ /[\+\-\*\/%\.]/ && adv eq '=') {
+            $op .= '=';
+        } else {
+            err("expected '=' in assignment") unless adv eq '=';
+        }
+    } 
     p_space;
-    return ['asgn', $tgt, p_expr];
+    return ['asgn', $tgt, $op, p_expr];
 }
 
 sub p_def {
