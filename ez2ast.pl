@@ -8,7 +8,6 @@ my %keywords = (
 );
 
 my $data;
-my $lastchar;
 my @pos = (1, 1);
 
 sub adv {
@@ -19,7 +18,6 @@ sub adv {
         $pos[0] += 1;
         $pos[1] = 1;
     }
-    $lastchar = $c;
     return $c;
 }
 
@@ -48,6 +46,25 @@ sub p_num {
     return ['num', $n];
 }
 
+sub p_str {
+    my $quote = adv;
+    my $res = '';
+    my $esc = 0;
+    my $start = join(':', @pos);
+    while (1) {
+        my $c = adv;
+        err("unterminated string literal starting at $start") if $c eq "\0";
+        if (!$esc) {
+            last if $c eq $quote;
+            $esc = 1 if $c eq '\\';
+        } else {
+            $esc = 0;
+        }
+        $res .= $c;
+    }
+    return ['str', $res];
+}
+
 sub p_var {
     err("expected '\$' to start var name") unless adv eq '$';
     return ['var', p_word];
@@ -60,6 +77,7 @@ sub p_lval {
 sub p_val {
     return p_var if peek eq '$';
     return p_num if peek =~ /\d/;
+    return p_str if peek eq '"';
     return p_call(p_word) if peek =~ /[A-Z]/i;
     if (adv eq '(') {
         my $ex = p_expr();
@@ -85,7 +103,7 @@ sub p_mul {
 sub p_sum {
     my @res = (p_mul);
     p_space;
-    while (peek =~ /[\+\-]/) {
+    while (peek =~ /[\+\-\.]/) {
         p_space;
         push @res, ['op', adv];
         p_space;
@@ -94,12 +112,22 @@ sub p_sum {
     return @res > 1 ? \@res : $res[0];
 }
 
+sub fetch_cmp_op {
+    my $op = adv;
+    if ($op eq '<' || $op eq '>') {
+        $op .= adv if peek eq '=';
+        return $op;
+    }
+    err("unknown comparison operator") unless adv eq '=';
+    return $op . '=';
+}
+
 sub p_cmp {
     my @res = (p_sum);
     p_space;
-    while (peek =~ /[\<\>]/) {
+    while (peek =~ /[\<\>\!=]/) {
         p_space;
-        push @res, ['op', adv];
+        push @res, ['op', fetch_cmp_op];
         p_space;
         push @res, p_sum;
     }

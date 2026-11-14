@@ -11,7 +11,11 @@ sub expr_to_str {
     my $res = '';
     for my $elem (@$expr) {
         if ($$elem[0] =~ 'num|op') {
-            $res .= $$elem[1];
+            my $op = $$elem[1];
+            $op = " $op " if $op eq '.';
+            $res .= $op;
+        } elsif ($$elem[0] eq 'str') {
+            $res .= '"' . $$elem[1] . '"';
         } elsif ($$elem[0] eq 'var') {
             $res .= '$' . $$elem[1];
         } elsif ($$elem[0] eq 'brex') {

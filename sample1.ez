@@ -3,9 +3,17 @@ while ($num < 10)
   $num = $num + 1;
 writeln($num);
 
+$num = 1;
+def $a = "";
+while ($num <= 7) {
+    $a = $num . $a;
+    writeln($a);
+    $num = $num + 1;
+}
+
 def $s = 0;
 $num = 1;
-while ($num < 10) {
+while ($num != 10) {
     if ($num % 2 > 0)
       $s = $s + $num;
     $num = $num + 1;
