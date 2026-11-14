@@ -45,17 +45,35 @@ sub def_to_str {
     return 'my ' . asgn_to_str($$expr[1]);
 }
 
-sub to_pl {
+sub cond_to_str {
+    my $st = $_[0];
+    my $block = stlist_to_str($$st[2]);
+    return $$st[0] . '(' . expr_to_str($$st[1]) . "){\n$block}"; 
+}
+
+sub stmt_to_str {
+    my $st = $_[0];
+    if ($$st[0] eq 'call') {
+        return call_to_str($st);
+    } elsif ($$st[0] eq 'asgn') {
+        return asgn_to_str($st);
+    } elsif ($$st[0] eq 'def') {
+        return def_to_str($st);
+    } elsif ($$st[0] =~ 'if|while') {
+        return cond_to_str($st);
+    }
+    return 'unknown_statement';
+}
+
+sub stlist_to_str {
     my $res = '';
     for my $st (@{$_[0]}) {
-        if ($$st[0] eq 'call') {
-            $res .= call_to_str($st);
-        } elsif ($$st[0] eq 'asgn') {
-            $res .= asgn_to_str($st);
-        } elsif ($$st[0] eq 'def') {
-            $res .= def_to_str($st);
-        }
+        $res .= stmt_to_str($st);
         $res .= ";\n";
     }
     return $res;
+}
+
+sub to_pl {
+    return stlist_to_str(@_);
 }

@@ -14,15 +14,23 @@ my $data = do {
 
 my $ast = to_ast($data);
 
-#print JSON::PP->new->pretty->encode($ast);
+my $output = $ARGV[1] // '';
 
-my $code = to_pl($ast);
-
-if (@ARGV < 2) {
-    eval($code);
-    print "Error: $@" if $@;
+if ($output eq '-ast') {
+    print JSON::PP->new->pretty->encode($ast);
 } else {
-    open(my $f, '>', $ARGV[1]);
-    print $f "use v5.10; use warnings;\n";
-    print $f $code;
+    my $code = to_pl($ast);
+    if ($output) {
+        if ($output ne '-') {
+            open(my $f, '>', $ARGV[1]);
+            print $f "use v5.10; use warnings;\n";
+            print $f $code;
+        } else {
+            print $code;
+        }
+    } else {
+        eval($code);
+        print "Error: $@" if $@;
+    }
 }
+

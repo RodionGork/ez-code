@@ -3,9 +3,12 @@ use warnings;
 
 my %keywords = (
     'def' => \&p_def,
+    'while' => \&p_cond,
+    'if' => \&p_cond,
 );
 
 my $data;
+my $lastchar;
 my @pos = (1, 1);
 
 sub adv {
@@ -16,6 +19,7 @@ sub adv {
         $pos[0] += 1;
         $pos[1] = 1;
     }
+    $lastchar = $c;
     return $c;
 }
 
@@ -69,7 +73,7 @@ sub p_val {
 sub p_mul {
     my @res = (p_val);
     p_space;
-    while (peek =~ /[\*\/]/) {
+    while (peek =~ /[\*\/%]/) {
         p_space;
         push @res, ['op', adv];
         p_space;
@@ -90,8 +94,20 @@ sub p_sum {
     return @res > 1 ? \@res : $res[0];
 }
 
+sub p_cmp {
+    my @res = (p_sum);
+    p_space;
+    while (peek =~ /[\<\>]/) {
+        p_space;
+        push @res, ['op', adv];
+        p_space;
+        push @res, p_sum;
+    }
+    return @res > 1 ? \@res : $res[0];
+}
+
 sub p_expr {
-    return p_sum;
+    return p_cmp;
 }
 
 sub p_asgn {
@@ -105,6 +121,26 @@ sub p_asgn {
 sub p_def {
     p_space;
     return ['def', p_asgn];
+}
+
+sub p_cond {
+    my $res = [$_[0]];
+    p_space;
+    err("expected '(' before loop condition") unless adv eq '(';
+    p_space;
+    push @$res, p_expr;
+    p_space;
+    err("expected ')' after loop condition") unless adv eq ')';
+    p_space;
+    if (peek eq '{') {
+        adv;
+        push @$res, p_stlist(), 'blk';
+        p_space;
+        err("expected '}' to end block") unless adv eq '}';
+    } else {
+        push @$res, [p_stmt()];
+    }
+    return $res;
 }
 
 sub p_call {
@@ -135,28 +171,37 @@ sub p_stmt {
     } elsif (peek =~ /[A-Z]/i) {
         my $word = p_word;
         if (my $kw = $keywords{$word}) {
-            return $kw->();
+            return $kw->($word);
         } else {
             return p_call($word);
         }
-    } elsif (peek eq "\0") {
-        return undef;
     }
     my $code = ord(peek);
     err("unexpected chr($code) at start of statement");
+}
+
+sub p_stlist {
+    my @res;
+    while (1) {
+        p_space;
+        last if peek eq "\0" || peek eq '}';
+        my $st = p_stmt;
+        push @res, $st;
+        p_space;
+        unless ($$st[@$st-1] eq 'blk') {
+            err("expected ';' at the end of statement") unless adv eq ';';
+        }
+    }
+    return \@res;
 }
 
 sub to_ast {
     my @bytes = split //, $_[0];
     push @bytes, "\0";
     $data = \@bytes;
-    my @ast;
-    while (my $st = p_stmt) {
-        push @ast, $st;
-        p_space;
-        err("expected ';' at the end of statement") unless adv eq ';';
-    }
-    return \@ast;
+    my $ast = p_stlist;
+    err("statement expected") unless peek eq "\0";
+    return $ast;
 }
 
 1;
