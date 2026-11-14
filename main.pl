@@ -16,4 +16,13 @@ my $ast = to_ast($data);
 
 #print JSON::PP->new->pretty->encode($ast);
 
-print to_pl($ast);
+my $code = to_pl($ast);
+
+if (@ARGV < 2) {
+    eval($code);
+    print "Error: $@" if $@;
+} else {
+    open(my $f, '>', $ARGV[1]);
+    print $f "use v5.10; use warnings;\n";
+    print $f $code;
+}

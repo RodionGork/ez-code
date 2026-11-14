@@ -1,7 +1,9 @@
 use v5.16;
 use warnings;
 
-my %keywords = ();
+my %keywords = (
+    'def' => \&p_def,
+);
 
 my $data;
 my @pos = (1, 1);
@@ -66,8 +68,11 @@ sub p_val {
 
 sub p_mul {
     my @res = (p_val);
+    p_space;
     while (peek =~ /[\*\/]/) {
+        p_space;
         push @res, ['op', adv];
+        p_space;
         push @res, p_val;
     }
     return @res > 1 ? \@res : $res[0];
@@ -75,8 +80,11 @@ sub p_mul {
 
 sub p_sum {
     my @res = (p_mul);
+    p_space;
     while (peek =~ /[\+\-]/) {
+        p_space;
         push @res, ['op', adv];
+        p_space;
         push @res, p_mul;
     }
     return @res > 1 ? \@res : $res[0];
@@ -90,7 +98,13 @@ sub p_asgn {
     my $tgt = p_lval;
     p_space;
     err("expected '=' in assignment") unless adv eq '=';
+    p_space;
     return ['asgn', $tgt, p_expr];
+}
+
+sub p_def {
+    p_space;
+    return ['def', p_asgn];
 }
 
 sub p_call {

@@ -35,11 +35,25 @@ sub call_to_str {
     return $res . ')';
 }
 
+sub asgn_to_str {
+    my $expr = $_[0];
+    return expr_to_str($$expr[1]) . '=' . expr_to_str($$expr[2]);
+}
+
+sub def_to_str {
+    my $expr = $_[0];
+    return 'my ' . asgn_to_str($$expr[1]);
+}
+
 sub to_pl {
     my $res = '';
     for my $st (@{$_[0]}) {
         if ($$st[0] eq 'call') {
             $res .= call_to_str($st);
+        } elsif ($$st[0] eq 'asgn') {
+            $res .= asgn_to_str($st);
+        } elsif ($$st[0] eq 'def') {
+            $res .= def_to_str($st);
         }
         $res .= ";\n";
     }
