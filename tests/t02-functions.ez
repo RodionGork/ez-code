@@ -1,0 +1,20 @@
+def newline(){
+    writeln("");
+}
+
+def sqr($a) {
+    ret $a * $a;
+}
+
+def mulstr($s, $n) {
+    def $res = "";
+    while ($n > 0) {
+        $res .= $s;
+        $n -= 1;
+    }
+    ret $res;
+}
+
+writeln(sqr(13));
+newline();
+writeln(mulstr("-+- ", 7));

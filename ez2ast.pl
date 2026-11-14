@@ -5,6 +5,7 @@ my %keywords = (
     'def' => \&p_def,
     'while' => \&p_cond,
     'if' => \&p_cond,
+    'ret' => \&p_ret,
 );
 
 my $data;
@@ -155,7 +156,30 @@ sub p_asgn {
 
 sub p_def {
     p_space;
-    return ['def', p_asgn];
+    return ['def', p_asgn] if peek eq '$';
+    my $fname = p_word;
+    p_space;
+    err("expected '(' in func definition") unless adv eq '(';
+    my $args = [];
+    p_space;
+    if (peek ne ')') {
+        while (1) {
+            push @$args, p_var;
+            p_space;
+            my $rbr = adv;
+            last if $rbr eq ')';
+            err("expected ')' or ',' in func arguments") unless $rbr eq ',';
+            p_space;
+        }
+    } else {
+        adv;
+    }
+    p_space;
+    err("expected '{' to start func body") unless adv eq '{';
+    my $body = p_stlist();
+    p_space;
+    err("expected '}' to end func body") unless adv eq '}';
+    return ['defn', $fname, $args, $body, 'blk'];
 }
 
 sub p_cond {
@@ -197,6 +221,11 @@ sub p_call {
         adv;
     }
     return ['call', $fname, $args];
+}
+
+sub p_ret {
+    p_space;
+    return ['ret', p_expr];
 }
 
 sub p_stmt {

@@ -49,6 +49,15 @@ sub def_to_str {
     return 'my ' . asgn_to_str($$expr[1]);
 }
 
+sub fn_to_str {
+    my $st = $_[0];
+    my $args = join(',', map {'$' . $$_[1]} @{$$st[2]});
+    my $res = 'sub ' . $$st[1] . " {\n";
+    $res .= "my ($args) = \@_;\n";
+    $res .= stlist_to_str($$st[3]) . '}';
+    return $res; 
+}
+
 sub cond_to_str {
     my $st = $_[0];
     my $block = stlist_to_str($$st[2]);
@@ -63,6 +72,10 @@ sub stmt_to_str {
         return asgn_to_str($st);
     } elsif ($$st[0] eq 'def') {
         return def_to_str($st);
+    } elsif ($$st[0] eq 'defn') {
+        return fn_to_str($st);
+    } elsif ($$st[0] eq 'ret') {
+        return 'return ' . expr_to_str($$st[1]);
     } elsif ($$st[0] =~ 'if|while') {
         return cond_to_str($st);
     }
