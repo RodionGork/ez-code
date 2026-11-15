@@ -4,6 +4,7 @@ use JSON::PP;
 use File::Basename;
 use lib dirname(__FILE__);
 require 'ez2ast.pl';
+require 'ast2out.pl';
 
 my @args = ();
 my $outlang = 'pl';
@@ -30,13 +31,10 @@ if ($outlang eq 'ast') {
     exit(0);
 }
 
-require "ast2$outlang.pl";
-
-my $code = stlist_to_str($ast);
+my $code = ast_to_str($ast, $outlang);
 if ($output) {
     if ($output ne '-') {
         open(my $f, '>', $args[1]);
-        print $f outlang_prefix();
         print $f $code;
     } else {
         print $code;

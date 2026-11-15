@@ -1,9 +1,33 @@
 use v5.16;
 use warnings;
 
-my %subs = (
-    'writeln' => 'say',
-);
+my %subs = ();
+
+my $specific = {
+    'pl' => {
+        'lang' => 'pl',
+        'concat_op' => ' . ',
+        'var_start' => '$',
+        'varx_start' => '$',
+        'hash_quote' => '{',
+        'var_def' => 'my',
+        'fn_def' => 'sub',
+        'header' => "use v5.10;use warnings;\n",
+        'writeln' => 'sub writeln{say(@_);}',
+    },
+    'js' => {
+        'lang' => 'js',
+        'concat_op' => '+',
+        'var_start' => '',
+        'varx_start' => '',
+        'hash_quote' => '[',
+        'var_def' => 'let',
+        'fn_def' => 'function',
+        'writeln' => 'function writeln(..._){console.log(..._)}',
+    },
+};
+
+my $spc;
 
 sub expr_to_str {
     my $expr = $_[0];
@@ -13,7 +37,7 @@ sub expr_to_str {
         my $type = $$elem[0];
         if ($type =~ 'num|op') {
             my $op = $$elem[1];
-            $op = " $op " if $op eq '.';
+            $op = $$spc{'concat_op'} if $op eq '.';
             $res .= $op;
         } elsif ($type eq 'str') {
             $res .= '"' . $$elem[1] . '"';
@@ -47,11 +71,12 @@ sub hash_to_str {
 
 sub var_to_str {
     my $elem = $_[0];
-    my $res = '$' . $$elem[1];
+    my $res = $$spc{'var_start'} . $$elem[1];
     if (@$elem > 2) {
-        $res = '$' . $res;
+        $res = $$spc{'varx_start'} . $res;
         for (my $i = 2; $i < @$elem; $i++) {
             my $quote = $$elem[$i][0];
+            $quote = $$spc{'hash_quote'} if $quote eq '{';
             $res .= $quote . expr_to_str($$elem[$i][1]) . chr(ord($quote)+2);
         }
     }
@@ -60,7 +85,8 @@ sub var_to_str {
 
 sub call_to_str {
     my $expr = $_[0];
-    my $res = $subs{$$expr[1]} // $$expr[1];
+    my $res = $$expr[1];
+    $subs{$$expr[1]} = $$spc{$$expr[1]}//'' unless $subs{$$expr[1]};
     $res .= '(';
     $res .= join(',', map {expr_to_str($_)} @{$$expr[2]});
     return $res . ')';
@@ -73,14 +99,16 @@ sub asgn_to_str {
 
 sub def_to_str {
     my $expr = $_[0];
-    return 'my ' . ($$expr[1][0] eq 'var' ? var_to_str($$expr[1]) : asgn_to_str($$expr[1]));
+    return "$$spc{'var_def'} " . ($$expr[1][0] eq 'var' ? var_to_str($$expr[1]) : asgn_to_str($$expr[1]));
 }
 
 sub fn_to_str {
     my $st = $_[0];
-    my $args = join(',', map {'$' . $$_[1]} @{$$st[2]});
-    my $res = 'sub ' . $$st[1] . " {\n";
-    $res .= "my ($args) = \@_;\n";
+    my $args = '(' . join(',', map {$$spc{'var_start'} . $$_[1]} @{$$st[2]}) . ')';
+    my $res = "$$spc{'fn_def'} $$st[1]";
+    $res .= $args unless $$spc{'lang'} eq 'pl';
+    $res .= "{\n";
+    $res .= "my $args = \@_;\n" if $$spc{'lang'} eq 'pl';
     $res .= stlist_to_str($$st[3]) . '}';
     return $res; 
 }
@@ -118,6 +146,15 @@ sub stlist_to_str {
     return $res;
 }
 
-sub outlang_prefix {
-    return "use v5.10; use warnings;\n";
+sub ast_to_str {
+    my ($ast, $lang) = @_;
+    $spc = $$specific{$lang};
+    my $prefix = $$spc{'header'}//'';
+    my $code = stlist_to_str($ast);
+    for my $k (keys %subs) {
+        $prefix .= $subs{$k} . "\n" if $subs{$k};
+    }
+    return $prefix . $code;
 }
+
+1;
