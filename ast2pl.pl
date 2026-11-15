@@ -10,18 +10,23 @@ sub expr_to_str {
     $expr = [$expr] unless ref($$expr[0]);
     my $res = '';
     for my $elem (@$expr) {
-        if ($$elem[0] =~ 'num|op') {
+        my $type = $$elem[0];
+        if ($type =~ 'num|op') {
             my $op = $$elem[1];
             $op = " $op " if $op eq '.';
             $res .= $op;
-        } elsif ($$elem[0] eq 'str') {
+        } elsif ($type eq 'str') {
             $res .= '"' . $$elem[1] . '"';
-        } elsif ($$elem[0] eq 'var') {
+        } elsif ($type eq 'var') {
             $res .= var_to_str($elem);
-        } elsif ($$elem[0] eq 'brex') {
+        } elsif ($type eq 'brex') {
             $res .= '(' . expr_to_str($$elem[1]) . ')';
-        } elsif ($$elem[0] eq 'call') {
+        } elsif ($type eq 'call') {
             $res .= call_to_str($elem);
+        } elsif ($type eq 'array') {
+            $res .= array_to_str($elem);
+        } elsif ($type eq 'hash') {
+            $res .= hash_to_str($elem);
         } elsif (ref($$elem[1]) eq 'ARRAY') {
             $res .= expr_to_str($elem);
         } else {
@@ -29,6 +34,14 @@ sub expr_to_str {
         }
     }
     return $res;
+}
+
+sub array_to_str {
+    return '[]';
+}
+
+sub hash_to_str {
+    return '{}';
 }
 
 sub var_to_str {

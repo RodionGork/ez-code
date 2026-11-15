@@ -92,11 +92,27 @@ sub p_lval {
     return p_var_indexed;
 }
 
+sub p_array {
+    adv;
+    p_space;
+    err("expected closing ']' in array literal") unless adv eq ']';
+    return ['array'];
+}
+
+sub p_hash {
+    adv;
+    p_space;
+    err("expected closing '}' in hash literal") unless adv eq '}';
+    return ['hash'];
+}
+
 sub p_val {
     return p_var_indexed if peek eq '$';
     return p_num if peek =~ /\d/;
     return p_str if peek eq '"';
     return p_call(p_word) if peek =~ /[A-Z]/i;
+    return p_array if peek eq '[';
+    return p_hash if peek eq '{';
     if (adv eq '(') {
         my $ex = p_expr();
         p_space;
