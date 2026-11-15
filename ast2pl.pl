@@ -17,7 +17,7 @@ sub expr_to_str {
         } elsif ($$elem[0] eq 'str') {
             $res .= '"' . $$elem[1] . '"';
         } elsif ($$elem[0] eq 'var') {
-            $res .= '$' . $$elem[1];
+            $res .= var_to_str($elem);
         } elsif ($$elem[0] eq 'brex') {
             $res .= '(' . expr_to_str($$elem[1]) . ')';
         } elsif ($$elem[0] eq 'call') {
@@ -26,6 +26,19 @@ sub expr_to_str {
             $res .= expr_to_str($elem);
         } else {
             die "unexpected expression element: " . encode_json($elem);
+        }
+    }
+    return $res;
+}
+
+sub var_to_str {
+    my $elem = $_[0];
+    my $res = '$' . $$elem[1];
+    if (@$elem > 2) {
+        $res = '$' . $res;
+        for (my $i = 2; $i < @$elem; $i++) {
+            my $quote = $$elem[$i][0];
+            $res .= $quote . expr_to_str($$elem[$i][1]) . chr(ord($quote)+2);
         }
     }
     return $res;
@@ -46,7 +59,7 @@ sub asgn_to_str {
 
 sub def_to_str {
     my $expr = $_[0];
-    return 'my ' . asgn_to_str($$expr[1]);
+    return 'my ' . ($$expr[1][0] eq 'var' ? var_to_str($$expr[1]) : asgn_to_str($$expr[1]));
 }
 
 sub fn_to_str {

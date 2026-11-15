@@ -75,12 +75,25 @@ sub p_var {
     return ['var', p_word];
 }
 
+sub p_var_indexed {
+    my $var = p_var;
+    while (peek eq '[' || peek eq '{') {
+        my $quote = adv;
+        p_space;
+        push @$var, [$quote, p_expr()];
+        p_space;
+        $quote = chr(ord($quote)+2);
+        err("expected '$quote' after index expression") if adv ne $quote;
+    }
+    return $var;
+}
+
 sub p_lval {
-    return p_var;
+    return p_var_indexed;
 }
 
 sub p_val {
-    return p_var if peek eq '$';
+    return p_var_indexed if peek eq '$';
     return p_num if peek =~ /\d/;
     return p_str if peek eq '"';
     return p_call(p_word) if peek =~ /[A-Z]/i;
@@ -144,7 +157,7 @@ sub p_expr {
 }
 
 sub p_asgn {
-    my $tgt = p_lval;
+    my $tgt = @_ ? $_[0] : p_lval;
     p_space;
     my $op = adv;
     if ($op ne '=') {
@@ -160,7 +173,12 @@ sub p_asgn {
 
 sub p_def {
     p_space;
-    return ['def', p_asgn] if peek eq '$';
+    if (peek eq '$') {
+        my $var = p_var;
+        p_space;
+        $var = p_asgn($var) if peek eq '='; 
+        return ['def', $var];
+    }
     my $fname = p_word;
     p_space;
     err("expected '(' in func definition") unless adv eq '(';

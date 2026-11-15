@@ -1,0 +1,14 @@
+def $a;
+$a[13] = 21;
+writeln($a[13]);
+def $some;
+$some{"pear"} = "tree";
+writeln($some{"pear"});
+def $paka;
+def $x=1; def $y=2;
+$paka[1][2]=19;
+writeln($paka[$x][$y]);
+def $kaka;
+$some{"zlo"} = "mla";
+$kaka{"mla"} = "blah";
+writeln($kaka{$some{"zlo"}});
