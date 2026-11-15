@@ -37,7 +37,8 @@ sub expr_to_str {
 }
 
 sub array_to_str {
-    return '[]';
+    my $expr = $_[0];
+    return '[' . join(',', map {expr_to_str($_)} @$expr[1..@$expr-1]) . ']';
 }
 
 sub hash_to_str {

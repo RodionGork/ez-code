@@ -95,8 +95,20 @@ sub p_lval {
 sub p_array {
     adv;
     p_space;
-    err("expected closing ']' in array literal") unless adv eq ']';
-    return ['array'];
+    my $res = ['array'];
+    if (peek ne ']') {
+        while (1) {
+            push @$res, p_expr();
+            p_space;
+            my $rbr = adv;
+            last if $rbr eq ']';
+            err("expected ']' or ',' in array literal") unless $rbr eq ',';
+            p_space;
+        }
+    } else {
+        adv;
+    }
+    return $res;
 }
 
 sub p_hash {

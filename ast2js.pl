@@ -13,7 +13,7 @@ sub expr_to_str {
         my $type = $$elem[0];
         if ($type =~ 'num|op') {
             my $op = $$elem[1];
-            $op = " $op " if $op eq '.';
+            $op = "+" if $op eq '.';
             $res .= $op;
         } elsif ($type eq 'str') {
             $res .= '"' . $$elem[1] . '"';
@@ -37,7 +37,8 @@ sub expr_to_str {
 }
 
 sub array_to_str {
-    return '[]';
+    my $expr = $_[0];
+    return '[' . join(',', map {expr_to_str($_)} @$expr[1..@$expr-1]) . ']';
 }
 
 sub hash_to_str {
