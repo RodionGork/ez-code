@@ -4,33 +4,44 @@ use JSON::PP;
 use File::Basename;
 use lib dirname(__FILE__);
 require 'ez2ast.pl';
-require 'ast2pl.pl';
+
+my @args = ();
+my $outlang = 'pl';
+for my $a (@ARGV) {
+    if ($a =~ /\-(js|pl|php|ast)/) {
+        $outlang = $1;
+    } else {
+        push @args, $a;
+    }
+}
 
 my $data = do {
-    open(my $f, '<', $ARGV[0]) or die 'Specify file-name in cmdline';
+    open(my $f, '<', $args[0]) or die 'Specify file-name in cmdline';
     undef $/;
     <$f>;
 };
 
 my $ast = to_ast($data);
 
-my $output = $ARGV[1] // '';
+my $output = $args[1] // '';
 
-if ($output eq '-ast') {
+if ($outlang eq 'ast') {
     print JSON::PP->new->pretty->encode($ast);
-} else {
-    my $code = to_pl($ast);
-    if ($output) {
-        if ($output ne '-') {
-            open(my $f, '>', $ARGV[1]);
-            print $f "use v5.10; use warnings;\n";
-            print $f $code;
-        } else {
-            print $code;
-        }
-    } else {
-        eval($code);
-        print "Error: $@" if $@;
-    }
+    exit(0);
 }
 
+require "ast2$outlang.pl";
+
+my $code = stlist_to_str($ast);
+if ($output) {
+    if ($output ne '-') {
+        open(my $f, '>', $args[1]);
+        print $f outlang_prefix();
+        print $f $code;
+    } else {
+        print $code;
+    }
+} else {
+    eval($code);
+    print "Error: $@" if $@;
+}

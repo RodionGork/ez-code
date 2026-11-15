@@ -117,6 +117,6 @@ sub stlist_to_str {
     return $res;
 }
 
-sub to_pl {
-    return stlist_to_str(@_);
+sub outlang_prefix {
+    return "use v5.10; use warnings;\n";
 }
