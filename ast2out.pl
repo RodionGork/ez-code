@@ -12,6 +12,8 @@ my $specific = {
         'hash_quote' => '{',
         'var_def' => 'my',
         'fn_def' => 'sub',
+        'break' => 'last',
+        'cont' => 'next',
         'header' => "use v5.10;use warnings;\n",
         'writeln' => 'sub writeln{say(@_);}',
     },
@@ -23,6 +25,8 @@ my $specific = {
         'hash_quote' => '[',
         'var_def' => 'let',
         'fn_def' => 'function',
+        'break' => 'break',
+        'cont' => 'continue',
         'writeln' => 'function writeln(..._){console.log(..._)}',
     },
 };
@@ -129,6 +133,8 @@ sub stmt_to_str {
         return def_to_str($st);
     } elsif ($$st[0] eq 'defn') {
         return fn_to_str($st);
+    } elsif ($$st[0] eq 'kw1') {
+        return $$spc{$$st[1]};
     } elsif ($$st[0] eq 'ret') {
         return 'return ' . expr_to_str($$st[1]);
     } elsif ($$st[0] =~ 'if|while') {

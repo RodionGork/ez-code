@@ -6,6 +6,8 @@ my %keywords = (
     'while' => \&p_cond,
     'if' => \&p_cond,
     'ret' => \&p_ret,
+    'break' => \&p_onekw,
+    'cont' => \&p_onekw,
 );
 
 my $data;
@@ -230,6 +232,10 @@ sub p_def {
     p_space;
     err("expected '}' to end func body") unless adv eq '}';
     return ['defn', $fname, $args, $body, 'blk'];
+}
+
+sub p_onekw {
+    return ['kw1', $_[0]];
 }
 
 sub p_cond {
