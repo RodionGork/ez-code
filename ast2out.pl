@@ -6,7 +6,7 @@ my %subs = ();
 my $specific = {
     'pl' => {
         'lang' => 'pl',
-        'concat_op' => ' . ',
+        'concat_op' => '.',
         'var_start' => '$',
         'varx_start' => '$',
         'hash_quote' => '{',
@@ -27,11 +27,12 @@ my $specific = {
         'fn_def' => 'function',
         'break' => 'break',
         'cont' => 'continue',
-        'writeln' => 'function writeln(..._){console.log(..._)}',
+        'writeln' => 'function writeln(..._){console.log(_.join(""))}',
+        'atan2' => 'function atan2(a,b){return Math.atan2(a,b)}',
     },
     'php' => {
         'lang' => 'php',
-        'concat_op' => ' . ',
+        'concat_op' => '.',
         'var_start' => '$',
         'varx_start' => '',
         'hash_quote' => '[',
@@ -54,7 +55,10 @@ sub expr_to_str {
         my $type = $$elem[0];
         if ($type =~ 'num|op') {
             my $op = $$elem[1];
-            $op = $$spc{'concat_op'} if $op eq '.';
+            if ($op eq '.') {
+            	$op = $$spc{'concat_op'};
+            	$op = " $op " if $op eq '.';
+            }
             $res .= $op;
         } elsif ($type eq 'str') {
             $res .= '"' . $$elem[1] . '"';
@@ -112,7 +116,9 @@ sub call_to_str {
 
 sub asgn_to_str {
     my $expr = $_[0];
-    return expr_to_str($$expr[1]) . $$expr[2] . expr_to_str($$expr[3]);
+    my $op = $$expr[2];
+    $op = $$spc{'concat_op'} . '=' if $op eq '.='; 
+    return expr_to_str($$expr[1]) . $op . expr_to_str($$expr[3]);
 }
 
 sub def_to_str {
@@ -120,7 +126,8 @@ sub def_to_str {
     my $noinit = $$expr[1][0] eq 'var';
     my $kw = $$spc{'var_def'};
     return if $noinit && !$kw;
-    return "$kw " . ($noinit ? var_to_str($$expr[1]) : asgn_to_str($$expr[1]));
+    $kw .= ' ' if $kw;
+    return $kw . ($noinit ? var_to_str($$expr[1]) : asgn_to_str($$expr[1]));
 }
 
 sub fn_to_str {
