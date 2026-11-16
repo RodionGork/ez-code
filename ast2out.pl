@@ -29,6 +29,19 @@ my $specific = {
         'cont' => 'continue',
         'writeln' => 'function writeln(..._){console.log(..._)}',
     },
+    'php' => {
+        'lang' => 'php',
+        'concat_op' => ' . ',
+        'var_start' => '$',
+        'varx_start' => '',
+        'hash_quote' => '[',
+        'var_def' => '',
+        'fn_def' => 'function',
+        'break' => 'break',
+        'cont' => 'continue',
+        'header' => "<?php\n",
+        'writeln' => 'function writeln(...$args){echo implode("", $args)."\n";}',
+    },
 };
 
 my $spc;
@@ -70,7 +83,8 @@ sub array_to_str {
 }
 
 sub hash_to_str {
-    return '{}';
+    my $lbr = $$spc{'hash_quote'};
+    return $lbr . chr(ord($lbr)+2);
 }
 
 sub var_to_str {
@@ -103,7 +117,10 @@ sub asgn_to_str {
 
 sub def_to_str {
     my $expr = $_[0];
-    return "$$spc{'var_def'} " . ($$expr[1][0] eq 'var' ? var_to_str($$expr[1]) : asgn_to_str($$expr[1]));
+    my $noinit = $$expr[1][0] eq 'var';
+    my $kw = $$spc{'var_def'};
+    return if $noinit && !$kw;
+    return "$kw " . ($noinit ? var_to_str($$expr[1]) : asgn_to_str($$expr[1]));
 }
 
 sub fn_to_str {
