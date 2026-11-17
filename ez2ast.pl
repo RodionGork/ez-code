@@ -138,28 +138,33 @@ sub p_val {
     err("expected value");
 }
 
+sub array_or_single {
+    my $arr = $_[0];
+    return @$arr > 1 ? $arr : $$arr[0];
+}
+
 sub p_mul {
     my @res = (p_val);
     p_space;
     while (peek =~ /[\*\/%]/) {
-        p_space;
         push @res, ['op', adv];
         p_space;
         push @res, p_val;
+        p_space;
     }
-    return @res > 1 ? \@res : $res[0];
+    return array_or_single(\@res);
 }
 
 sub p_sum {
     my @res = (p_mul);
     p_space;
     while (peek =~ /[\+\-\.]/) {
-        p_space;
         push @res, ['op', adv];
         p_space;
         push @res, p_mul;
+        p_space;
     }
-    return @res > 1 ? \@res : $res[0];
+    return array_or_single(\@res);
 }
 
 sub fetch_cmp_op {
@@ -176,16 +181,42 @@ sub p_cmp {
     my @res = (p_sum);
     p_space;
     while (peek =~ /[\<\>\!=]/) {
-        p_space;
         push @res, ['op', fetch_cmp_op];
         p_space;
         push @res, p_sum;
+        p_space;
     }
-    return @res > 1 ? \@res : $res[0];
+    return array_or_single(\@res);
+}
+
+sub p_and {
+    my @res = (p_cmp);
+    p_space;
+    while (peek eq '&') {
+        adv;
+        err("expected second '&' in AND operator") unless adv eq '&';
+        p_space;
+        push @res, ['op', '&&'], p_cmp;
+        p_space;
+    }
+    return array_or_single(\@res);
+}
+
+sub p_or {
+    my @res = (p_and);
+    p_space;
+    while (peek eq '|') {
+        adv;
+        err("expected second '|' in OR operator") unless adv eq '|';
+        p_space;
+        push @res, ['op', '||'], p_and;
+        p_space;
+    }
+    return array_or_single(\@res);
 }
 
 sub p_expr {
-    return p_cmp;
+    return p_or;
 }
 
 sub p_asgn {
