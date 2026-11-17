@@ -1,4 +1,4 @@
-# practical problem - calculates number of steps in collatz congecture
+# practical problem - calculates number of steps in collatz conjecture
 # sequence A006577 in the OEIS
 
 def collatz($n) {

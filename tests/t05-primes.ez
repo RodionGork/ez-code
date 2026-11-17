@@ -1,23 +1,24 @@
-# we lack array length and loop break yet, but work-around this
+# calculates first prime numbers and prints the last generated
 
-def $target = 20;
-
+def $target = 20;             # wanted amount of primes
 def $primes = [2, 3, 5, 7];
 
-def is_prime($x) {
+def is_prime($x, $divisors) {
     def $i = 0;
     while (1) {
-        def $d = $primes[$i];
-        if ($d*$d > $x) ret 1;
-        if ($x % $d == 0) ret 0;
+        def $d = $divisors[$i];
+        if ($d*$d > $x)
+            ret 1;
+        if ($x % $d == 0)
+            ret 0;
         $i += 1;
     }
 }
 
-def $n = 9;
 def $c = 4;
+def $n = 9;
 while (1) {
-    if (is_prime($n)) {
+    if (is_prime($n, $primes)) {
         $primes[$c] = $n;
         $c += 1;
         if ($c == $target) {

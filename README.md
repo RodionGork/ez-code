@@ -10,6 +10,44 @@ create their own parts of the game.
 Under development and at the moment without strong feeling that it could be
 completed / perfected to be suitable for any practial purpose.
 
+### Syntax
+
+We want the language to resemble other C-like languages, so it is similar to
+JavaScript, Perl and PHP (a kind of blend). Here is an example:
+
+```
+# calculates first prime numbers and prints the last generated
+
+def $target = 20;             # wanted amount of primes
+def $primes = [2, 3, 5, 7];
+
+def is_prime($x, $divisors) {
+    def $i = 0;
+    while (1) {
+        def $d = $divisors[$i];
+        if ($d*$d > $x)
+            ret 1;
+        if ($x % $d == 0)
+            ret 0;
+        $i += 1;
+    }
+}
+
+def $c = 4;
+def $n = 9;
+while (1) {
+    if (is_prime($n, $primes)) {
+        $primes[$c] = $n;
+        $c += 1;
+        if ($c == $target) {
+            writeln("primes[" . $target . "] = " . $primes[$target-1]);
+            break;
+        }
+    }
+    $n += 2;
+}
+```
+
 ### Usage
 
 Like this:
