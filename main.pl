@@ -37,7 +37,7 @@ if ($outlang eq '') {
 my $autorun = ($outlang eq 'run');
 $outlang = 'pl' unless $outlang =~ 'pl|js|php';
 
-my $code = ast_to_str($ast, $outlang);
+my $code = ast_to_str($ast, $outlang, 2);
 if ($autorun) {
     eval($code);
     if ($@) {

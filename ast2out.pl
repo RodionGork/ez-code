@@ -48,6 +48,7 @@ my $specific = {
 };
 
 my $spc;
+my $indent;
 
 sub expr_to_str {
     my $expr = $_[0];
@@ -133,27 +134,27 @@ sub def_to_str {
 }
 
 sub fn_to_str {
-    my $st = $_[0];
+    my ($st, $depth) = @_;
     my $args = '(' . join(',', map {$$spc{'var_start'} . $$_[1]} @{$$st[2]}) . ')';
     my $res = "$$spc{'fn_def'} $$st[1]";
     $res .= $args unless $$spc{'lang'} eq 'pl';
     $res .= "{\n";
     $res .= "my $args = \@_;\n" if $$spc{'lang'} eq 'pl';
-    $res .= stlist_to_str($$st[3]) . '}';
+    $res .= stlist_to_str($$st[3], $depth + 1) . '}';
     return $res; 
 }
 
 sub cond_to_str {
-    my $st = $_[0];
+    my ($st, $depth) = @_;
     push @$st, 'blk' unless $$st[-1] eq 'blk';
     my $kw = $$st[0];
-    my $block = stlist_to_str($$st[-2]);
+    my $block = stlist_to_str($$st[-2], $depth + 1);
     my $expr = $kw ne 'else' ? '(' . expr_to_str($$st[1]) . ')' : '';
-    return ($$spc{$kw}//$kw) . $expr . "{\n$block}";
+    return ($$spc{$kw}//$kw) . $expr . "{\n$block" . (' ' x ($depth * $indent)) . '}';
 }
 
 sub stmt_to_str {
-    my $st = $_[0];
+    my ($st, $depth) = @_;
     if ($$st[0] eq 'call') {
         return call_to_str($st);
     } elsif ($$st[0] eq 'asgn') {
@@ -161,21 +162,23 @@ sub stmt_to_str {
     } elsif ($$st[0] eq 'def') {
         return def_to_str($st);
     } elsif ($$st[0] eq 'defn') {
-        return fn_to_str($st);
+        return fn_to_str($st, $depth);
     } elsif ($$st[0] eq 'kw1') {
         return $$spc{$$st[1]};
     } elsif ($$st[0] eq 'ret') {
         return 'return ' . expr_to_str($$st[1]);
     } elsif ($$st[0] =~ 'if|elsif|else|while') {
-        return cond_to_str($st);
+        return cond_to_str($st, $depth);
     }
     return 'unknown_statement';
 }
 
 sub stlist_to_str {
+    my ($ast, $depth) = @_;
     my $res = '';
-    for my $st (@{$_[0]}) {
-        $res .= stmt_to_str($st);
+    for my $st (@$ast) {
+        $res .= ' ' x ($depth * $indent);
+        $res .= stmt_to_str($st, $depth);
         $res .= ';' unless $$st[-1] eq 'blk';
         $res .= "\n";
     }
@@ -184,9 +187,10 @@ sub stlist_to_str {
 
 sub ast_to_str {
     my ($ast, $lang) = @_;
+    $indent = $_[2];
     $spc = $$specific{$lang};
     my $prefix = $$spc{'header'}//'';
-    my $code = stlist_to_str($ast);
+    my $code = stlist_to_str($ast, 0);
     for my $k (keys %subs) {
         $prefix .= $subs{$k} . "\n" if $subs{$k};
     }
