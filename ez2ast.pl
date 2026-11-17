@@ -5,6 +5,8 @@ my %keywords = (
     'def' => \&p_def,
     'while' => \&p_cond,
     'if' => \&p_cond,
+    'else' => \&p_cond,
+    'elsif' => \&p_cond,
     'ret' => \&p_ret,
     'break' => \&p_onekw,
     'cont' => \&p_onekw,
@@ -239,14 +241,18 @@ sub p_onekw {
 }
 
 sub p_cond {
+    my ($kw, $prev) = @_;
     my $res = [$_[0]];
+    err("$kw without preceding if") if $kw =~ /else|elsif/ && (!@$prev || !($$prev[-1][0] =~ /if|elsif/));
     p_space;
-    err("expected '(' before loop condition") unless adv eq '(';
-    p_space;
-    push @$res, p_expr;
-    p_space;
-    err("expected ')' after loop condition") unless adv eq ')';
-    p_space;
+    if ($kw ne 'else') {
+        err("expected '(' before condition") unless adv eq '(';
+        p_space;
+        push @$res, p_expr;
+        p_space;
+        err("expected ')' after condition") unless adv eq ')';
+        p_space;
+    }
     if (peek eq '{') {
         adv;
         push @$res, p_stlist(), 'blk';
@@ -285,13 +291,14 @@ sub p_ret {
 }
 
 sub p_stmt {
+    my $preceding = $_[0];
     p_space;
     if (peek eq '$') {
         return p_asgn;
     } elsif (peek =~ /[A-Z]/i) {
         my $word = p_word;
         if (my $kw = $keywords{$word}) {
-            return $kw->($word);
+            return $kw->($word, $preceding);
         } else {
             return p_call($word);
         }
@@ -301,18 +308,18 @@ sub p_stmt {
 }
 
 sub p_stlist {
-    my @res;
+    my $res = [];
     while (1) {
         p_space;
         last if peek eq "\0" || peek eq '}';
-        my $st = p_stmt;
-        push @res, $st;
+        my $st = p_stmt($res);
+        push @$res, $st;
         p_space;
         unless ($$st[@$st-1] eq 'blk') {
             err("expected ';' at the end of statement") unless adv eq ';';
         }
     }
-    return \@res;
+    return $res;
 }
 
 sub to_ast {

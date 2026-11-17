@@ -27,6 +27,7 @@ my $specific = {
         'fn_def' => 'function',
         'break' => 'break',
         'cont' => 'continue',
+        'elsif' => 'else if',
         'writeln' => 'function writeln(..._){console.log(_.join(""))}',
         'atan2' => 'function atan2(a,b){return Math.atan2(a,b)}',
     },
@@ -40,6 +41,7 @@ my $specific = {
         'fn_def' => 'function',
         'break' => 'break',
         'cont' => 'continue',
+        'elsif' => 'elseif',
         'header' => "<?php\n",
         'writeln' => 'function writeln(...$args){echo implode("", $args)."\n";}',
     },
@@ -143,8 +145,11 @@ sub fn_to_str {
 
 sub cond_to_str {
     my $st = $_[0];
-    my $block = stlist_to_str($$st[2]);
-    return $$st[0] . '(' . expr_to_str($$st[1]) . "){\n$block}"; 
+    push @$st, 'blk' unless $$st[-1] eq 'blk';
+    my $kw = $$st[0];
+    my $block = stlist_to_str($$st[-2]);
+    my $expr = $kw ne 'else' ? '(' . expr_to_str($$st[1]) . ')' : '';
+    return ($$spc{$kw}//$kw) . $expr . "{\n$block}";
 }
 
 sub stmt_to_str {
@@ -161,7 +166,7 @@ sub stmt_to_str {
         return $$spc{$$st[1]};
     } elsif ($$st[0] eq 'ret') {
         return 'return ' . expr_to_str($$st[1]);
-    } elsif ($$st[0] =~ 'if|while') {
+    } elsif ($$st[0] =~ 'if|elsif|else|while') {
         return cond_to_str($st);
     }
     return 'unknown_statement';
@@ -171,7 +176,8 @@ sub stlist_to_str {
     my $res = '';
     for my $st (@{$_[0]}) {
         $res .= stmt_to_str($st);
-        $res .= ";\n";
+        $res .= ';' unless $$st[-1] eq 'blk';
+        $res .= "\n";
     }
     return $res;
 }
