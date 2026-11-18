@@ -9,7 +9,7 @@ require 'ast2out.pl';
 my @args = ();
 my $outlang = '';
 for my $a (@ARGV) {
-    if ($a =~ /\-(js|pl|php|ast|run)/) {
+    if ($a =~ /\-(js|pl|php|py|ast|run)/) {
         $outlang = $1;
     } else {
         push @args, $a;
@@ -35,7 +35,7 @@ if ($outlang eq '') {
 }
 
 my $autorun = ($outlang eq 'run');
-$outlang = 'pl' unless $outlang =~ 'pl|js|php';
+$outlang = 'pl' unless $outlang =~ 'pl|js|php|py';
 
 my $code = ast_to_str($ast, $outlang, 2);
 if ($autorun) {

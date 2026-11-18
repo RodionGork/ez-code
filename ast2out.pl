@@ -45,6 +45,21 @@ my $specific = {
         'header' => "<?php\n",
         'writeln' => 'function writeln(...$args){echo implode("", $args)."\n";}',
     },
+    'py' => {
+        'lang' => 'py',
+        'concat_op' => '+',
+        'var_start' => '',
+        'varx_start' => '',
+        'hash_quote' => '[',
+        'var_def' => '',
+        'fn_def' => 'def',
+        'break' => 'break',
+        'cont' => 'continue',
+        'elsif' => 'elif',
+        'header' => "import math\n",
+        'atan2' => 'def atan2(a,b): return math.atan2(a,b)',
+        'writeln' => 'def writeln(*args): print(*args)',
+    },
 };
 
 my $spc;
@@ -57,15 +72,19 @@ sub expr_to_str {
     my $elem = $$expr[0];
     my $type = $$elem[0];
     if ($type eq'op') {
+        my @a = @$expr[1 .. @$expr-2];
+        my $a = expr_to_str(\@a);
+        my $b .= expr_to_str([$$expr[-1]]);
         my $op = $$elem[1];
         if ($op eq '.') {
         	$op = $$spc{'concat_op'};
-        	$op = " $op " if $op eq '.';
+        	$op = " . " if $op eq '.';
+        	if ($$spc{'lang'} eq 'py') {
+        	    $a = "str($a)";
+        	    $b = "str($b)";
+        	}
         }
-        my @a = @$expr[1 .. @$expr-2];
-        $res .= expr_to_str(\@a);
-        $res .= $op;
-        $res .= expr_to_str([$$expr[-1]]);
+        $res .= $a . $op . $b;
     } elsif ($type eq 'num') {
         $res .= $$elem[1];
     } elsif ($type eq 'str') {
@@ -137,24 +156,38 @@ sub def_to_str {
     return $kw . ($noinit ? var_to_str($$expr[1]) : asgn_to_str($$expr[1]));
 }
 
+sub block_to_str {
+    my ($content, $depth) = @_;
+    my $python = $$spc{'lang'} eq 'py';
+    my $res = ($python ? ':' : '{') . "\n";
+    $res .= stlist_to_str($content, $depth + 1);
+    if ($python) {
+        chop $res;
+    } else {
+        $res .= (' ' x ($depth * $indent)) . '}';
+    }
+    return $res;
+}
+
 sub fn_to_str {
     my ($st, $depth) = @_;
     my $args = '(' . join(',', map {$$spc{'var_start'} . $$_[1]} @{$$st[2]}) . ')';
     my $res = "$$spc{'fn_def'} $$st[1]";
     $res .= $args unless $$spc{'lang'} eq 'pl';
-    $res .= "{\n";
-    $res .= "my $args = \@_;\n" if $$spc{'lang'} eq 'pl';
-    $res .= stlist_to_str($$st[3], $depth + 1) . '}';
-    return $res; 
+    my $block .= block_to_str($$st[3], $depth);
+    if ($$spc{'lang'} eq 'pl') {
+        my @parts = split /\n/, $block, 2;
+        $block = $parts[0] . "my $args = \@_;\n" . $parts[1];
+    }
+    return $res . $block; 
 }
 
 sub cond_to_str {
     my ($st, $depth) = @_;
     push @$st, 'blk' unless $$st[-1] eq 'blk';
     my $kw = $$st[0];
-    my $block = stlist_to_str($$st[-2], $depth + 1);
     my $expr = $kw ne 'else' ? '(' . expr_to_str($$st[1]) . ')' : '';
-    return ($$spc{$kw}//$kw) . $expr . "{\n$block" . (' ' x ($depth * $indent)) . '}';
+    return ($$spc{$kw}//$kw) . $expr . block_to_str($$st[-2], $depth);
 }
 
 sub stmt_to_str {
