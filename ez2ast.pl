@@ -147,7 +147,7 @@ sub p_mul {
     my @res = (p_val);
     p_space;
     while (peek =~ /[\*\/%]/) {
-        push @res, ['op', adv];
+        unshift @res, ['op', adv];
         p_space;
         push @res, p_val;
         p_space;
@@ -159,7 +159,7 @@ sub p_sum {
     my @res = (p_mul);
     p_space;
     while (peek =~ /[\+\-\.]/) {
-        push @res, ['op', adv];
+        unshift @res, ['op', adv];
         p_space;
         push @res, p_mul;
         p_space;
@@ -181,7 +181,7 @@ sub p_cmp {
     my @res = (p_sum);
     p_space;
     while (peek =~ /[\<\>\!=]/) {
-        push @res, ['op', fetch_cmp_op];
+        unshift @res, ['op', fetch_cmp_op];
         p_space;
         push @res, p_sum;
         p_space;
@@ -196,7 +196,8 @@ sub p_and {
         adv;
         err("expected second '&' in AND operator") unless adv eq '&';
         p_space;
-        push @res, ['op', '&&'], p_cmp;
+        unshift @res, ['op', '&&'];
+        push @res, p_cmp;
         p_space;
     }
     return array_or_single(\@res);
@@ -209,7 +210,8 @@ sub p_or {
         adv;
         err("expected second '|' in OR operator") unless adv eq '|';
         p_space;
-        push @res, ['op', '||'], p_and;
+        unshift @res, ['op', '||'];
+        push @res, p_and;
         p_space;
     }
     return array_or_single(\@res);

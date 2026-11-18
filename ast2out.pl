@@ -54,32 +54,36 @@ sub expr_to_str {
     my $expr = $_[0];
     $expr = [$expr] unless ref($$expr[0]);
     my $res = '';
-    for my $elem (@$expr) {
-        my $type = $$elem[0];
-        if ($type =~ 'num|op') {
-            my $op = $$elem[1];
-            if ($op eq '.') {
-            	$op = $$spc{'concat_op'};
-            	$op = " $op " if $op eq '.';
-            }
-            $res .= $op;
-        } elsif ($type eq 'str') {
-            $res .= '"' . $$elem[1] . '"';
-        } elsif ($type eq 'var') {
-            $res .= var_to_str($elem);
-        } elsif ($type eq 'brex') {
-            $res .= '(' . expr_to_str($$elem[1]) . ')';
-        } elsif ($type eq 'call') {
-            $res .= call_to_str($elem);
-        } elsif ($type eq 'array') {
-            $res .= array_to_str($elem);
-        } elsif ($type eq 'hash') {
-            $res .= hash_to_str($elem);
-        } elsif (ref($$elem[1]) eq 'ARRAY') {
-            $res .= expr_to_str($elem);
-        } else {
-            die "unexpected expression element: " . encode_json($elem);
+    my $elem = $$expr[0];
+    my $type = $$elem[0];
+    if ($type eq'op') {
+        my $op = $$elem[1];
+        if ($op eq '.') {
+        	$op = $$spc{'concat_op'};
+        	$op = " $op " if $op eq '.';
         }
+        my @a = @$expr[1 .. @$expr-2];
+        $res .= expr_to_str(\@a);
+        $res .= $op;
+        $res .= expr_to_str([$$expr[-1]]);
+    } elsif ($type eq 'num') {
+        $res .= $$elem[1];
+    } elsif ($type eq 'str') {
+        $res .= '"' . $$elem[1] . '"';
+    } elsif ($type eq 'var') {
+        $res .= var_to_str($elem);
+    } elsif ($type eq 'brex') {
+        $res .= '(' . expr_to_str($$elem[1]) . ')';
+    } elsif ($type eq 'call') {
+        $res .= call_to_str($elem);
+    } elsif ($type eq 'array') {
+        $res .= array_to_str($elem);
+    } elsif ($type eq 'hash') {
+        $res .= hash_to_str($elem);
+    } elsif (ref($$elem[1]) eq 'ARRAY') {
+        $res .= expr_to_str($elem);
+    } else {
+        die "unexpected expression element: " . encode_json($elem);
     }
     return $res;
 }
