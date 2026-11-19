@@ -15,6 +15,7 @@ my $specific = {
         'break' => 'last',
         'cont' => 'next',
         'header' => "use v5.10;use warnings;\n",
+        'push' => ['apush', 'sub apush{push @{$_[0]}, $_[1];}'],
         'writeln' => 'sub writeln{say(@_);}',
     },
     'js' => {
@@ -28,6 +29,7 @@ my $specific = {
         'break' => 'break',
         'cont' => 'continue',
         'elsif' => 'else if',
+        'push' => 'function push(a,x){a.push(x)}',
         'writeln' => 'function writeln(..._){console.log(_.join(""))}',
         'atan2' => 'function atan2(a,b){return Math.atan2(a,b)}',
     },
@@ -43,11 +45,14 @@ my $specific = {
         'cont' => 'continue',
         'elsif' => 'elseif',
         'header' => "<?php\n",
+        'push' => 'function push(&$a,$x){$a[]=$x;}',
         'writeln' => 'function writeln(...$args){echo implode("", $args)."\n";}',
     },
     'py' => {
         'lang' => 'py',
         'concat_op' => '+',
+        '&&' => ' and ',
+        '||' => ' or ',
         'var_start' => '',
         'varx_start' => '',
         'hash_quote' => '[',
@@ -57,6 +62,7 @@ my $specific = {
         'cont' => 'continue',
         'elsif' => 'elif',
         'header' => "import math\n",
+        'push' => 'def push(a,x): a.append(x)',
         'atan2' => 'def atan2(a,b): return math.atan2(a,b)',
         'writeln' => 'def writeln(*args): print(*args)',
     },
@@ -84,6 +90,7 @@ sub expr_to_str {
         	    $b = "str($b)";
         	}
         }
+        $op = $$spc{$op}//$op;
         $res .= $a . $op . $b;
     } elsif ($type eq 'num') {
         $res .= $$elem[1];
@@ -134,7 +141,12 @@ sub var_to_str {
 sub call_to_str {
     my $expr = $_[0];
     my $res = $$expr[1];
-    $subs{$$expr[1]} = $$spc{$$expr[1]}//'' unless $subs{$$expr[1]};
+    my $def = $$spc{$$expr[1]};
+    if (ref($def) eq 'ARRAY') {
+        $res = $$def[0];
+        $def = $$def[1];
+    }
+    $subs{$$expr[1]} = $def//'' unless $subs{$$expr[1]};
     $res .= '(';
     $res .= join(',', map {expr_to_str($_)} @{$$expr[2]});
     return $res . ')';

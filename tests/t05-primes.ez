@@ -19,7 +19,7 @@ def $c = 4;
 def $n = 9;
 while (1) {
     if (is_prime($n, $primes)) {
-        $primes[$c] = $n;
+        push($primes, $n);
         $c += 1;
         if ($c == $target) {
             writeln("primes[" . $target . "] = " . $primes[$target-1]);
