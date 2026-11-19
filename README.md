@@ -1,7 +1,8 @@
 # EZ-code
 
 Attempt to create simplistic scripting language which translates easily
-to `Perl` or `PHP` for server-side use - and to `JavaScript` for use in browser.
+to `Perl`, `PHP` or `Python` for server-side use - and to `JavaScript` for
+use in browser.
 
 This is intended to be used for describing logic of Mud-like game, so that
 it can both work on server and be used as a JS sandbox for uses wishing to
@@ -13,7 +14,8 @@ completed / perfected to be suitable for any practial purpose.
 ### Syntax
 
 We want the language to resemble other C-like languages, so it is similar to
-JavaScript, Perl and PHP (a kind of blend). Here is an example:
+JavaScript, Perl and PHP (a kind of blend). Detailed description is to be
+provided yet, but for now here is an example (and others could be found `tests`):
 
 ```
 # calculates first prime numbers and prints the last generated
@@ -67,7 +69,7 @@ flag:
 
     perl main.pl tests/t03-collatz.ez -js
 
-Language flag could be one of `-pl`, `-js`, `-php` and `-ast`. The latter
+Language flag could be one of `-pl`, `-js`, `-php`, `-py` and `-ast`. The latter
 actually dumps JSON abstract syntax tree without converting it further to
 output language. The `-pl` is default and is useful if output file name has
 non-standard extension.
