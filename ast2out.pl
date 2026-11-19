@@ -1,7 +1,7 @@
 use v5.16;
 use warnings;
 
-my %subs = ();
+my $lib;
 
 my $specific = {
     'pl' => {
@@ -140,16 +140,13 @@ sub var_to_str {
 
 sub call_to_str {
     my $expr = $_[0];
-    my $res = $$expr[1];
-    my $def = $$spc{$$expr[1]};
-    if (ref($def) eq 'ARRAY') {
-        $res = $$def[0];
-        $def = $$def[1];
+    my $name = $$expr[1];
+    my $def = $$lib{$name};
+    if (defined $def) {
+        push(@$def, 1) if @$def < 3;
+        $name = $$def[1];
     }
-    $subs{$$expr[1]} = $def//'' unless $subs{$$expr[1]};
-    $res .= '(';
-    $res .= join(',', map {expr_to_str($_)} @{$$expr[2]});
-    return $res . ')';
+    return "$name(" . join(',', map {expr_to_str($_)} @{$$expr[2]}) . ')';
 }
 
 sub asgn_to_str {
@@ -238,10 +235,14 @@ sub ast_to_str {
     my ($ast, $lang) = @_;
     $indent = $_[2];
     $spc = $$specific{$lang};
+    $lib = funclib($lang);
+    for my $fname (keys %$lib) {
+        $$lib{$fname} = [$$lib{$fname}, $fname] if ref($$lib{$fname}) ne 'ARRAY';
+    }
     my $prefix = $$spc{'header'}//'';
     my $code = stlist_to_str($ast, 0);
-    for my $k (keys %subs) {
-        $prefix .= $subs{$k} . "\n" if $subs{$k};
+    for my $k (keys %$lib) {
+        $prefix .= $$lib{$k}[0] . "\n" if $$lib{$k}[2];
     }
     return $prefix . $code;
 }

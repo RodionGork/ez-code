@@ -35,13 +35,11 @@ def is_prime(x, divisors) {
     }
 }
 
-def c = 4;
 def n = 9;
 while (1) {
     if (is_prime(n, primes)) {
         push(primes, n);
-        c += 1;
-        if (c == target) {
+        if (len(primes) == target) {
             writeln("primes[" . target . "] = " . primes[target-1]);
             break;
         }

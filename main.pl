@@ -4,6 +4,7 @@ use JSON::PP;
 use File::Basename;
 use lib dirname(__FILE__);
 require 'ez2ast.pl';
+require 'funclib.pl';
 require 'ast2out.pl';
 
 my @args = ();
