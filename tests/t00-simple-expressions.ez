@@ -1,14 +1,14 @@
 # here we mainly test parsing of expressions, def and call statements
 writeln();
   writeln(3 -1);
-def $x = 7;
-def $y = $x*$x;
-$x = $y - $x;
+def x = 7;
+def y = x*x;
+x = y - x;
 writeln(3,atan2(5,2),8);
 writeln(3, 5,8);
-  writeln ( 3 ,5*(2+1+$y) ,8+2*$x ) ;
+  writeln ( 3 ,5*(2+1+y) ,8+2*x ) ;
 writeln("Done!\ngood bye!");
-def $w = "bla" . "mla";
-$w .= "zlo";
-writeln($w);
+def w = "bla" . "mla";
+w .= "zlo";
+writeln(w);
 # end of file comment

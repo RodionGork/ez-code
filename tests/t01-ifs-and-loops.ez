@@ -1,23 +1,23 @@
 # testing conditional statements and loops
 
-def $num = 1;
-while ($num < 10)
-  $num += 1;
-writeln($num);
+def num = 1;
+while (num < 10)
+  num += 1;
+writeln(num);
 
-$num = 1;
-def $a = "";
-while ($num <= 7) {
-    $a = $num . $a;
-    writeln($a);
-    $num += 1;
+num = 1;
+def a = "";
+while (num <= 7) {
+    a = num . a;
+    writeln(a);
+    num += 1;
 }
 
-def $s = 0;
-$num = 1;
-while ($num != 10) {
-    if ($num % 2 > 0)
-      $s += $num;
-    $num += 1;
+def s = 0;
+num = 1;
+while (num != 10) {
+    if (num % 2 > 0)
+      s += num;
+    num += 1;
 }
-writeln($s);
+writeln(s);

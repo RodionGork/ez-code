@@ -44,7 +44,7 @@ sub p_space {
 }
 
 sub p_word {
-    my $w = '';
+    my $w = adv; # may include dollar sign
     $w .= adv while peek =~ /\w/;
     return $w;
 }
@@ -75,12 +75,13 @@ sub p_str {
 }
 
 sub p_var {
-    err("expected '\$' to start var name") unless adv eq '$';
-    return ['var', p_word];
+    my $name = @_ ? $_[0] : p_word;
+    $name =~ s/^\$//;
+    return ['var', $name];
 }
 
 sub p_var_indexed {
-    my $var = p_var;
+    my $var = p_var(@_);
     while (peek eq '[' || peek eq '{') {
         my $quote = adv;
         p_space;
@@ -90,10 +91,6 @@ sub p_var_indexed {
         err("expected '$quote' after index expression") if adv ne $quote;
     }
     return $var;
-}
-
-sub p_lval {
-    return p_var_indexed;
 }
 
 sub p_array {
@@ -123,10 +120,13 @@ sub p_hash {
 }
 
 sub p_val {
-    return p_var_indexed if peek eq '$';
+    if (peek =~ /[A-Z\$]/i) {
+        my $name = p_word;
+        p_space;
+        return peek ne '(' ? p_var_indexed($name) : p_call($name);
+    }
     return p_num if peek =~ /\d/;
     return p_str if peek eq '"';
-    return p_call(p_word) if peek =~ /[A-Z]/i;
     return p_array if peek eq '[';
     return p_hash if peek eq '{';
     if (adv eq '(') {
@@ -222,7 +222,7 @@ sub p_expr {
 }
 
 sub p_asgn {
-    my $tgt = @_ ? $_[0] : p_lval;
+    my $tgt = @_ ? $_[0] : p_var_indexed;
     p_space;
     my $op = adv;
     if ($op ne '=') {
@@ -238,15 +238,15 @@ sub p_asgn {
 
 sub p_def {
     p_space;
-    if (peek eq '$') {
-        my $var = p_var;
-        p_space;
+    my $name = p_word;
+    p_space;
+    if (peek ne '(') {
+        my $var = p_var($name);
         $var = p_asgn($var) if peek eq '='; 
         return ['def', $var];
     }
-    my $fname = p_word;
+    adv;
     p_space;
-    err("expected '(' in func definition") unless adv eq '(';
     my $args = [];
     p_space;
     if (peek ne ')') {
@@ -266,7 +266,7 @@ sub p_def {
     my $body = p_stlist();
     p_space;
     err("expected '}' to end func body") unless adv eq '}';
-    return ['defn', $fname, $args, $body, 'blk'];
+    return ['defn', $name, $args, $body, 'blk'];
 }
 
 sub p_onekw {
@@ -326,18 +326,13 @@ sub p_ret {
 sub p_stmt {
     my $preceding = $_[0];
     p_space;
-    if (peek eq '$') {
-        return p_asgn;
-    } elsif (peek =~ /[A-Z]/i) {
-        my $word = p_word;
-        if (my $kw = $keywords{$word}) {
-            return $kw->($word, $preceding);
-        } else {
-            return p_call($word);
-        }
+    err("letter or '\$' expected at start of statement") if peek !~ /[A-Z\$]/i;
+    my $word = p_word;
+    if (my $kw = $keywords{$word}) {
+        return $kw->($word, $preceding);
     }
-    my $code = ord(peek);
-    err("unexpected chr($code) at start of statement");
+    p_space;
+    return peek eq '(' ? p_call($word) : p_asgn(p_var_indexed($word));
 }
 
 sub p_stlist {

@@ -1,16 +1,16 @@
-def $a = 5;
-if ($a == 8 || $a == 3)
-  $a += 2;
+def a = 5;
+if (a == 8 || a == 3)
+  a += 2;
 else {
-  $a *= 2;
+  a *= 2;
 }
 
-if ($a>10&&$a>20) {
-  $a -= 2;
+if (a>10&&a>20) {
+  a -= 2;
   writeln("low");
-} elsif ($a < 10) {
-  $a += 100;
+} elsif (a < 10) {
+  a += 100;
 }
-else $a *= 2;
+else a *= 2;
 
-writeln($a); #should be 20
+writeln(a); #should be 20
