@@ -92,6 +92,8 @@ sub expr_to_str {
         }
         $op = $$spc{$op}//$op;
         $res .= $a . $op . $b;
+    } elsif ($type eq 'uop') {
+        $res .= $$elem[1] . expr_to_str($$elem[2]);
     } elsif ($type eq 'num') {
         $res .= $$elem[1];
     } elsif ($type eq 'str') {

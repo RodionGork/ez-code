@@ -126,6 +126,7 @@ sub p_val {
         p_space;
         return peek ne '(' ? p_var_indexed($name) : p_call($name);
     }
+    return p_unary() if peek =~ /[\!\-]/;
     return p_num if peek =~ /\d/;
     return p_str if peek eq '"';
     return p_array if peek eq '[';
@@ -137,6 +138,11 @@ sub p_val {
         return ['brex', $ex];
     }
     err("expected value");
+}
+
+sub p_unary {
+    my $op = adv;
+    return ['uop', $op, p_val];
 }
 
 sub array_or_single {

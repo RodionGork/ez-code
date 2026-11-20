@@ -10,7 +10,7 @@ fn sqr(a) {
 
 fn mulstr(s, n) {
     def res = "";
-    while (n > 0) {
+    while (!(n == 0)) {
         res .= s;
         n -= 1;
     }
