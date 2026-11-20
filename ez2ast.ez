@@ -1,0 +1,172 @@
+def kws = {};
+kws{"def"} = "p_def";
+kws{"fn"} = "p_defn";
+kws{"while"} = "p_cond";
+kws{"if"} = "p_cond";
+kws{"else"} = "p_cond";
+kws{"elsif"} = "p_cond";
+kws{"ret"} = "p_ret";
+kws{"break"} = "p_onekw";
+kws{"cont"} = "p_onekw";
+
+def data;
+def pos = [1, 1];
+
+fn adv() {
+    def c = shift(data);
+    if (scmp(c, "\n") != 0) {
+        pos[1] += 1;
+    } else {
+        pos[0] += 1;
+        pos[1] = 1;
+    }
+    ret c;
+}
+
+fn peek() {
+    ret data[0];
+}
+
+fn err(msg) {
+    writeln(msg, " at ", join(":", pos));
+    exit(1);
+}
+
+fn p_asgn(target) {
+    p_space();
+    def op = adv();
+    if (scmp(op, "=") != 0) {
+        if (!match(op, "[\\+\\-\\*\\/%\\.]") || scmp(adv(), "=") != 0)
+            err("expected '=' in assignment");
+        $op .= "=";
+    } 
+    p_space();
+    ret ["asgn", target, op, p_expr()];
+}
+
+fn p_call(fname) {
+    p_space();
+    if (scmp(adv(), "(") != 0)
+        err("expected '(' for function call");
+    def args = [];
+    p_space();
+    if (scmp(peek(), ")") != 0) {
+        while (1) {
+            push(args, p_expr());
+            p_space();
+            def rbr = adv();
+            if (scmp(rbr, ")") == 0)
+                break;
+            if (scmp(rbr, ",") != 0)
+                err("expected ')' or ',' in argument list");
+            p_space();
+        }
+    } else {
+        adv();
+    }
+    ret ['call', fname, args];
+}
+
+fn p_def() {
+    p_space();
+    def var = p_var(p_word());
+    p_space();
+    if (scmp(peek(), "=") == 0)
+        var = p_asgn(var);
+    ret ["def", var];
+}
+
+fn p_expr() {
+    ret p_num();
+}
+
+fn p_onekw(w) {
+    ret ["kw1", w];
+}
+
+fn p_num() {
+    def n = "";
+    while (match(peek(), "\\d"))
+        n .= adv();
+    ret ["num", n];
+}
+
+fn p_ret() {
+    p_space();
+    ret ["ret", p_expr()];
+}
+
+fn p_space() {
+    while (match(peek(), "[\\s#]")) {
+        if (scmp(adv(), "#") == 0) {
+            while (scmp(peek(), "\n") != 0 && scmp(peek(), "\0") != 0)
+                adv();
+        }
+    }
+}
+
+fn p_var(name) {
+    ret ["var", subst(name, "^\\\$", "")];
+}
+
+fn p_var_indexed(name) {
+    def var = p_var(name);
+    while (match(peek(), "[\\[\\{]")) {
+        def quote = adv();
+        p_space();
+        push(var, [quote, p_expr()]);
+        p_space();
+        quote = chr(ord(quote)+2);
+        if (scmp(adv(), quote) != 0)
+            err("expected '. quote . ' after index expression");
+    }
+    ret var;
+}
+
+fn p_word() {
+    def w = adv(); # may include dollar sign
+    while (match(peek(), "\\w"))
+        w .= adv();
+    ret w;
+}
+
+fn stmt(prev) {
+    p_space();
+    if (!match(peek(), "[A-Za-z\\\$]"))
+        err("letter or '\$' expected at start of statement");
+    def word = p_word();
+    if (haskey(word, kws)) {
+        ret callname(kws{word}, [word, prev]);
+    }
+    p_space();
+    if (scmp(peek(), "(") == 0)
+        ret p_call(word);
+    else
+        ret p_asgn(p_var_indexed(word));
+}
+
+fn stlist() {
+    def res = [];
+    while (1==1) {
+        p_space();
+        if (scmp(peek(), "\0") == 0 || scmp(peek(), "}") == 0)
+            break;
+        def st = stmt(res);
+        push(res, st);
+        p_space();
+        if (scmp(st[len(st)-1], "blk") != 0 && scmp(adv(), ";") != 0) {
+            err("expected ';' at the end of statement");
+        }
+    }
+    ret res;
+}
+
+fn to_ast(code) {
+    data = split("", code);
+    push(data, "\0");
+    def ast = stlist();
+    if (scmp(peek(), "\0") != 0)
+    	err("statement expected");
+    ret ast;
+}
+

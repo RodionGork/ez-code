@@ -4,8 +4,16 @@ use warnings;
 my $funclib = {
     'pl' => {
         'push' => ['sub apush{push @{$_[0]}, $_[1];}', 'apush'],
+        'shift' => ['sub ashift{shift @{$_[0]};}', 'ashift'],
         'len' => 'sub len{scalar @{$_[0]};}',
+        'split' => ['sub asplit{my @res = split($_[0],$_[1]); \@res;}', 'asplit'],
+        'join' => ['sub ajoin{join $_[0], @{$_[1]}}', 'ajoin'],
+        'match' => 'sub match{$_[0] =~ qr/$_[1]/;}',
+        'subst' => 'sub subst{$_[0] =~ s/$_[1]/$_[2]/rg;}',
+        'haskey' => 'sub haskey{defined $_[1]->{$_[0]};}',
+        'scmp' => 'sub scmp{$_[0] cmp $_[1];}',
         'writeln' => 'sub writeln{say(@_);}',
+        'callname' => 'sub callname{(\&{$_[0]})->(@{$_[1]});}',
     },
     'js' => {
         'push' => 'function push(a,x){a.push(x)}',
