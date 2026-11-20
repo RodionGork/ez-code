@@ -3,6 +3,7 @@ use warnings;
 
 my %keywords = (
     'def' => \&p_def,
+    'fn' => \&p_defn,
     'while' => \&p_cond,
     'if' => \&p_cond,
     'else' => \&p_cond,
@@ -239,12 +240,17 @@ sub p_asgn {
 sub p_def {
     p_space;
     my $name = p_word;
+    my $var = p_var($name);
     p_space;
-    if (peek ne '(') {
-        my $var = p_var($name);
-        $var = p_asgn($var) if peek eq '='; 
-        return ['def', $var];
-    }
+    $var = p_asgn($var) if peek eq '=';
+    return ['def', $var];
+}
+
+sub p_defn {
+    p_space;
+    my $name = p_word;
+    p_space;
+    err("expected '(' in function definition") if peek ne '(';
     adv;
     p_space;
     my $args = [];

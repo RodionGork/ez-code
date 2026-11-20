@@ -23,7 +23,7 @@ provided yet, but for now here is an example (and others could be found `tests`)
 def target = 20;             # wanted amount of primes
 def primes = [2, 3, 5, 7];
 
-def is_prime(x, divisors) {
+fn is_prime(x, divisors) {
     def i = 0;
     while (1) {
         def d = divisors[i];

@@ -1,14 +1,14 @@
 # testing functions with various number of arguments
 
-def newline(){
+fn newline(){
     writeln("");
 }
 
-def sqr(a) {
+fn sqr(a) {
     ret a * a;
 }
 
-def mulstr(s, n) {
+fn mulstr(s, n) {
     def res = "";
     while (n > 0) {
         res .= s;

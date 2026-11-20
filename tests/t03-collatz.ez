@@ -1,7 +1,7 @@
 # practical problem - calculates number of steps in collatz conjecture
 # sequence A006577 in the OEIS
 
-def collatz(n) {
+fn collatz(n) {
     def cnt = 0;
     while (n > 1) {
         if (n % 2) {
