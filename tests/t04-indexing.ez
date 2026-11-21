@@ -1,4 +1,6 @@
 # won't work with python, which doesn't allow arbitrary index to array
+#notest:py
+
 def a = [];
 a[13] = 21;
 writeln(a[13]);

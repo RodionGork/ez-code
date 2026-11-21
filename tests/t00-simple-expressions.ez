@@ -4,7 +4,7 @@ writeln();
 def x = 7;
 def y = x*x;
 x = y - x;
-writeln(3,atan2(5,2),8);
+writeln(3,int(atan2(5,2)*100000),8);
 writeln(3, 5,8);
   writeln ( 3 ,5*(2+1+y) ,8+2*x ) ;
 writeln("Done!\ngood bye!");

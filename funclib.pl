@@ -23,10 +23,12 @@ my $funclib = {
         'len' => 'function len(a){return a.length}',
         'writeln' => 'function writeln(..._){console.log(_.join(""))}',
         'atan2' => 'function atan2(a,b){return Math.atan2(a,b)}',
+        'int' => 'function int(x){return Math.floor(x)}',
     },
     'php' => {
         'push' => 'function push(&$a,$x){$a[]=$x;}',
         'len' => 'function len($a){return count($a);}',
+        'int' => 'function int($x){return floor($x);}',
         'writeln' => 'function writeln(...$args){echo implode("", $args)."\n";}',
     },
     'py' => {
