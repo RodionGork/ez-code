@@ -5,7 +5,7 @@ use warnings;
 use JSON::PP;
 use File::Basename;
 use lib dirname(__FILE__);
-require 'ez2ast.pl';
+require 'ez2ast-gen.pl';
 require 'funclib.pl';
 require 'ast2out.pl';
 
@@ -40,7 +40,7 @@ if ($outlang eq '') {
 my $autorun = ($outlang eq 'run');
 $outlang = 'pl' unless $outlang =~ 'pl|js|php|py';
 
-my $code = ast_to_str($ast, $outlang, 2);
+my $code = ast_to_str($ast, $outlang, 2, $autorun);
 if ($autorun) {
     eval($code);
     if ($@) {

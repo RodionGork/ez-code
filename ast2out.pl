@@ -14,7 +14,7 @@ my $specific = {
         'fn_def' => 'sub',
         'break' => 'last',
         'cont' => 'next',
-        'header' => "use v5.10;use warnings;\n",
+        'header' => "use v5.16;use warnings;\n",
         'push' => ['apush', 'sub apush{push @{$_[0]}, $_[1];}'],
         'writeln' => 'sub writeln{say(@_);}',
     },
@@ -236,8 +236,8 @@ sub stlist_to_str {
 }
 
 sub ast_to_str {
-    my ($ast, $lang) = @_;
-    $indent = $_[2];
+    my ($ast, $lang, $ind, $toeval) = @_;
+    $indent = $ind;
     $spc = $$specific{$lang};
     $lib = funclib($lang);
     for my $fname (keys %$lib) {
@@ -245,8 +245,8 @@ sub ast_to_str {
     }
     my $prefix = $$spc{'header'}//'';
     my $code = stlist_to_str($ast, 0);
-    for my $k (keys %$lib) {
-        $prefix .= $$lib{$k}[0] . "\n" if $$lib{$k}[2];
+    for my $k (sort keys %$lib) {
+        $prefix .= $$lib{$k}[0] . "\n" if $$lib{$k}[2] && (!$toeval || !defined &{$$lib{$k}[1]});
     }
     return $prefix . $code;
 }
