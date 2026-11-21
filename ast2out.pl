@@ -53,6 +53,7 @@ my $specific = {
         'concat_op' => '+',
         '&&' => ' and ',
         '||' => ' or ',
+        '!' => ' not ',
         'var_start' => '',
         'varx_start' => '',
         'hash_quote' => '[',
@@ -93,7 +94,8 @@ sub expr_to_str {
         $op = $$spc{$op}//$op;
         $res .= $a . $op . $b;
     } elsif ($type eq 'uop') {
-        $res .= $$elem[1] . expr_to_str($$elem[2]);
+        my $op = $$elem[1];
+        $res .= ($$spc{$op}//$op) . expr_to_str($$elem[2]);
     } elsif ($type eq 'num') {
         $res .= $$elem[1];
     } elsif ($type eq 'str') {
