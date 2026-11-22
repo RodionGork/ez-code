@@ -7,13 +7,25 @@ use File::Basename;
 use lib dirname(__FILE__);
 require 'ez2ast-gen.pl';
 require 'funclib.pl';
-require 'ast2out.pl';
+require 'ast2out-gen.pl';
+
+my $lf = funclib('pl');
+for my $fname (keys %$lf) {
+    my $s = $$lf{$fname};
+    eval(ref($s) eq 'ARRAY' ? $$s[0] : $s);
+}
 
 my @args = ();
-my $outlang = '';
+my $bare = 0;
+my $autorun = 0;
+my $outlang = 's';
 for my $a (@ARGV) {
-    if ($a =~ /\-(js|pl|php|py|ast|run)/) {
+    if ($a =~ /\-(js|pl|php|py|ast)/) {
         $outlang = $1;
+    } elsif ($a eq '-bare') {
+        $bare = 1;
+    } elsif ($a eq '-run') {
+        $autorun = 1;
     } else {
         push @args, $a;
     }
@@ -37,10 +49,9 @@ if ($outlang eq '') {
     $outlang = ($outfile =~ s/.*\.//r) || 'pl';
 }
 
-my $autorun = ($outlang eq 'run');
 $outlang = 'pl' unless $outlang =~ 'pl|js|php|py';
 
-my $code = ast_to_str($ast, $outlang, 2, $autorun);
+my $code = ast_to_str($ast, $outlang, 2, $autorun || $bare);
 if ($autorun) {
     eval($code);
     if ($@) {

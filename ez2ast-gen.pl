@@ -1,29 +1,9 @@
 use v5.16;use warnings;
-sub callname{(\&{$_[0]})->(@{$_[1]});}
-sub streq{$_[0] eq $_[1];}
-sub halt{say($_[1]);exit($_[0]);}
-sub haskey{defined $_[1]->{$_[0]};}
-sub ajoin{join $_[0], @{$_[1]}}
-sub len{scalar @{$_[0]};}
-sub match{$_[0] =~ qr/$_[1]/;}
-sub apush{push @{$_[0]}, $_[1];}
-sub asplit{my @res = split($_[0],$_[1]); \@res;}
-sub subst{$_[0] =~ s/$_[1]/$_[2]/rg;}
-sub aunshift{unshift @{$_[0]}, $_[1];}
-my $kws={};
-$$kws{"def"}="p_def";
-$$kws{"fn"}="p_defn";
-$$kws{"while"}="p_cond";
-$$kws{"if"}="p_cond";
-$$kws{"else"}="p_cond";
-$$kws{"elsif"}="p_cond";
-$$kws{"ret"}="p_ret";
-$$kws{"break"}="p_onekw";
-$$kws{"cont"}="p_onekw";
+my $kws={"def"=>"p_def","fn"=>"p_defn","while"=>"p_cond","if"=>"p_cond","else"=>"p_cond","elsif"=>"p_cond","ret"=>"p_ret","break"=>"p_onekw","cont"=>"p_onekw",};
 my $data;
 my $cur=0;
 my $pos=[1,1];
-sub adv{my () = @_;
+sub adv{
   my $c=$$data[$cur];
   $cur+=1;
   if(!streq($c,"\n")){
@@ -35,13 +15,13 @@ sub adv{my () = @_;
   }
   return $c;
 }
-sub peek{my () = @_;
+sub peek{
   return $$data[$cur];
 }
-sub err{my ($msg) = @_;
+sub err{ my ($msg)= @_;
   halt(1,$msg . " at " . ajoin(":",$pos));
 }
-sub fetch_cmp_op{my () = @_;
+sub fetch_cmp_op{
   my $op=adv();
   if(match($op,"[\\<\\>]")){
     if(streq(peek(),"=")){
@@ -54,14 +34,14 @@ sub fetch_cmp_op{my () = @_;
   }
   return $op . "=";
 }
-sub fetch_log_op{my () = @_;
+sub fetch_log_op{
   my $op=adv();
   if(!streq(adv(),$op)){
     err("unknown logic operator");
   }
   return $op . $op;
 }
-sub p_array{my () = @_;
+sub p_array{
   adv();
   p_space();
   my $res=["array"];
@@ -84,7 +64,7 @@ sub p_array{my () = @_;
   }
   return $res;
 }
-sub p_asgn{my ($target) = @_;
+sub p_asgn{ my ($target)= @_;
   p_space();
   my $op=adv();
   if(!streq($op,"=")){
@@ -96,7 +76,7 @@ sub p_asgn{my ($target) = @_;
   p_space();
   return ["asgn",$target,$op,p_expr()];
 }
-sub p_assoc{my () = @_;
+sub p_assoc{
   adv();
   p_space();
   my $res=["hash"];
@@ -128,7 +108,7 @@ sub p_assoc{my () = @_;
   }
   return $res;
 }
-sub p_block{my ($res) = @_;
+sub p_block{ my ($res)= @_;
   adv();
   apush($res,stlist());
   apush($res,"blk");
@@ -137,7 +117,7 @@ sub p_block{my ($res) = @_;
     err("expected '}' to end block");
   }
 }
-sub p_call{my ($fname) = @_;
+sub p_call{ my ($fname)= @_;
   p_space();
   if(!streq(adv(),"(")){
     err("expected '(' for function call");
@@ -163,7 +143,7 @@ sub p_call{my ($fname) = @_;
   }
   return ["call",$fname,$args];
 }
-sub p_cond{my ($kw,$prev) = @_;
+sub p_cond{ my ($kw,$prev)= @_;
   my $res=[$kw];
   if(match($kw,"else|elsif")&&(len($prev)==0||!match($$prev[len($prev)-1][0],"if|elsif"))){
     err($kw . " without preceding if");
@@ -189,7 +169,7 @@ sub p_cond{my ($kw,$prev) = @_;
   }
   return $res;
 }
-sub p_def{my () = @_;
+sub p_def{
   p_space();
   my $var=p_var(p_word());
   p_space();
@@ -198,7 +178,7 @@ sub p_def{my () = @_;
   }
   return ["def",$var];
 }
-sub p_defn{my () = @_;
+sub p_defn{
   p_space();
   my $name=p_word();
   p_space();
@@ -234,13 +214,13 @@ sub p_defn{my () = @_;
   p_block($res);
   return $res;
 }
-sub p_expr{my () = @_;
+sub p_expr{
   return p_ex_or();
 }
-sub p_ex_and{my () = @_;
+sub p_ex_and{
   return p_ex_bop("p_ex_cmp","&","fetch_log_op");
 }
-sub p_ex_bop{my ($fnext,$expr,$fgetop) = @_;
+sub p_ex_bop{ my ($fnext,$expr,$fgetop)= @_;
   my $res=[callname($fnext,[])];
   p_space();
   while(match(peek(),$expr)){
@@ -254,33 +234,33 @@ sub p_ex_bop{my ($fnext,$expr,$fgetop) = @_;
   }
   return $res;
 }
-sub p_ex_cmp{my () = @_;
+sub p_ex_cmp{
   return p_ex_bop("p_ex_sum","[\\<\\>\\!=]","fetch_cmp_op");
 }
-sub p_ex_mul{my () = @_;
+sub p_ex_mul{
   return p_ex_bop("p_value","[\\*\\/%]","adv");
 }
-sub p_ex_or{my () = @_;
+sub p_ex_or{
   return p_ex_bop("p_ex_and","\\|","fetch_log_op");
 }
-sub p_ex_sum{my () = @_;
+sub p_ex_sum{
   return p_ex_bop("p_ex_mul","[\\+\\-\\.]","adv");
 }
-sub p_onekw{my ($w) = @_;
+sub p_onekw{ my ($w)= @_;
   return ["kw1",$w];
 }
-sub p_num{my () = @_;
+sub p_num{
   my $n="";
   while(match(peek(),"\\d")){
     $n.=adv();
   }
   return ["num",$n];
 }
-sub p_ret{my () = @_;
+sub p_ret{
   p_space();
   return ["ret",p_expr()];
 }
-sub p_space{my () = @_;
+sub p_space{
   while(match(peek(),"[\\s#]")){
     if(streq(adv(),"#")){
       while(!streq(peek(),"\n")&&!streq(peek(),"\0")){
@@ -289,7 +269,7 @@ sub p_space{my () = @_;
     }
   }
 }
-sub p_str{my () = @_;
+sub p_str{
   my $quote=adv();
   my $res="";
   my $esc=0;
@@ -314,11 +294,11 @@ sub p_str{my () = @_;
   }
   return ["str",$res];
 }
-sub p_unary{my () = @_;
+sub p_unary{
   my $op=adv();
   return ["uop",$op,p_value()];
 }
-sub p_value{my () = @_;
+sub p_value{
   if(match(peek(),"[A-Za-z\\\$]")){
     my $name=p_word();
     p_space();
@@ -354,10 +334,10 @@ sub p_value{my () = @_;
   }
   err("value expected in expression");
 }
-sub p_var{my ($name) = @_;
+sub p_var{ my ($name)= @_;
   return ["var",subst($name,"^\\\$","")];
 }
-sub p_var_indexed{my ($name) = @_;
+sub p_var_indexed{ my ($name)= @_;
   my $var=p_var($name);
   while(match(peek(),"[\\[\\{]")){
     my $quote=adv();
@@ -371,14 +351,14 @@ sub p_var_indexed{my ($name) = @_;
   }
   return $var;
 }
-sub p_word{my () = @_;
+sub p_word{
   my $w=adv();
   while(match(peek(),"\\w")){
     $w.=adv();
   }
   return $w;
 }
-sub stmt{my ($prev) = @_;
+sub stmt{ my ($prev)= @_;
   p_space();
   if(!match(peek(),"[A-Za-z\\\$]")){
     err("letter or '\$' expected at start of statement");
@@ -395,7 +375,7 @@ sub stmt{my ($prev) = @_;
     return p_asgn(p_var_indexed($word));
   }
 }
-sub stlist{my () = @_;
+sub stlist{
   my $res=[];
   while(1==1){
     p_space();
@@ -411,7 +391,7 @@ sub stlist{my () = @_;
   }
   return $res;
 }
-sub to_ast{my ($code) = @_;
+sub to_ast{ my ($code)= @_;
   $data=asplit("",$code);
   apush($data,"\0");
   my $ast=stlist();

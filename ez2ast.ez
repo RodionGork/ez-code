@@ -1,13 +1,14 @@
-def kws = {};
-kws{"def"} = "p_def";
-kws{"fn"} = "p_defn";
-kws{"while"} = "p_cond";
-kws{"if"} = "p_cond";
-kws{"else"} = "p_cond";
-kws{"elsif"} = "p_cond";
-kws{"ret"} = "p_ret";
-kws{"break"} = "p_onekw";
-kws{"cont"} = "p_onekw";
+def kws = {
+    "def": "p_def",
+    "fn": "p_defn",
+    "while": "p_cond",
+    "if": "p_cond",
+    "else": "p_cond",
+    "elsif": "p_cond",
+    "ret": "p_ret",
+    "break": "p_onekw",
+    "cont": "p_onekw"
+};
 
 def data;
 def cur = 0;
