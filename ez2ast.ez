@@ -10,10 +10,12 @@ kws{"break"} = "p_onekw";
 kws{"cont"} = "p_onekw";
 
 def data;
+def cur = 0;
 def pos = [1, 1];
 
 fn adv() {
-    def c = shift(data);
+    def c = data[cur];
+    cur += 1;
     if (!eq(c, "\n")) {
         pos[1] += 1;
     } else {
@@ -24,7 +26,7 @@ fn adv() {
 }
 
 fn peek() {
-    ret data[0];
+    ret data[cur];
 }
 
 fn err(msg) {
@@ -86,9 +88,29 @@ fn p_asgn(target) {
 fn p_assoc() {
     adv();
     p_space();
-    if (!eq(adv(), "}"))
-        err("expected closing '}' in hash literal");
-    ret ["hash"];
+    def res = ["hash"];
+    if (!eq(peek(), "}")) {
+        while (1) {
+            if (!eq(peek(), "\""))
+                err("expected string for key in hash literal");
+            push(res, p_str());
+            p_space();
+            if (!eq(adv(), ":"))
+                err("expected ':' after key in hash literal");
+            p_space();
+            push(res, p_expr());
+            p_space();
+            def rbr = adv();
+            if (eq(rbr, "}"))
+                break;
+            if (!eq(rbr, ","))
+                err("expected '}' or ',' in hash literal");
+            p_space();
+        }
+    } else {
+        adv();
+    }
+    ret res;
 }
 
 fn p_block(res) {

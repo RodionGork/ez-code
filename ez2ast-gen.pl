@@ -7,7 +7,6 @@ sub ajoin{join $_[0], @{$_[1]}}
 sub len{scalar @{$_[0]};}
 sub match{$_[0] =~ qr/$_[1]/;}
 sub apush{push @{$_[0]}, $_[1];}
-sub ashift{shift @{$_[0]};}
 sub asplit{my @res = split($_[0],$_[1]); \@res;}
 sub subst{$_[0] =~ s/$_[1]/$_[2]/rg;}
 sub aunshift{unshift @{$_[0]}, $_[1];}
@@ -22,9 +21,11 @@ $$kws{"ret"}="p_ret";
 $$kws{"break"}="p_onekw";
 $$kws{"cont"}="p_onekw";
 my $data;
+my $cur=0;
 my $pos=[1,1];
 sub adv{my () = @_;
-  my $c=ashift($data);
+  my $c=$$data[$cur];
+  $cur+=1;
   if(!streq($c,"\n")){
     $$pos[1]+=1;
   }
@@ -35,7 +36,7 @@ sub adv{my () = @_;
   return $c;
 }
 sub peek{my () = @_;
-  return $$data[0];
+  return $$data[$cur];
 }
 sub err{my ($msg) = @_;
   halt(1,$msg . " at " . ajoin(":",$pos));
@@ -98,10 +99,34 @@ sub p_asgn{my ($target) = @_;
 sub p_assoc{my () = @_;
   adv();
   p_space();
-  if(!streq(adv(),"}")){
-    err("expected closing '}' in hash literal");
+  my $res=["hash"];
+  if(!streq(peek(),"}")){
+    while(1){
+      if(!streq(peek(),"\"")){
+        err("expected string for key in hash literal");
+      }
+      apush($res,p_str());
+      p_space();
+      if(!streq(adv(),":")){
+        err("expected ':' after key in hash literal");
+      }
+      p_space();
+      apush($res,p_expr());
+      p_space();
+      my $rbr=adv();
+      if(streq($rbr,"}")){
+        last;
+      }
+      if(!streq($rbr,",")){
+        err("expected '}' or ',' in hash literal");
+      }
+      p_space();
+    }
   }
-  return ["hash"];
+  else{
+    adv();
+  }
+  return $res;
 }
 sub p_block{my ($res) = @_;
   adv();

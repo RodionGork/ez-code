@@ -9,7 +9,7 @@ my $specific = {
         'concat_op' => '.',
         'var_start' => '$',
         'varx_start' => '$',
-        'hash_quote' => '{',
+        'hash_idx_quote' => '{',
         'var_def' => 'my',
         'fn_def' => 'sub',
         'break' => 'last',
@@ -23,7 +23,7 @@ my $specific = {
         'concat_op' => '+',
         'var_start' => '',
         'varx_start' => '',
-        'hash_quote' => '[',
+        'hash_arrow' => ':',
         'var_def' => 'let',
         'fn_def' => 'function',
         'break' => 'break',
@@ -38,7 +38,7 @@ my $specific = {
         'concat_op' => '.',
         'var_start' => '$',
         'varx_start' => '',
-        'hash_quote' => '[',
+        'hash_lit_quote' => '[',
         'var_def' => '',
         'fn_def' => 'function',
         'break' => 'break',
@@ -56,7 +56,7 @@ my $specific = {
         '!' => ' not ',
         'var_start' => '',
         'varx_start' => '',
-        'hash_quote' => '[',
+        'hash_arrow' => ':',
         'var_def' => '',
         'fn_def' => 'def',
         'break' => 'break',
@@ -78,7 +78,7 @@ sub expr_to_str {
     my $res = '';
     my $elem = $$expr[0];
     my $type = $$elem[0];
-    if ($type eq'op') {
+    if ($type eq 'op') {
         my @a = @$expr[1 .. @$expr-2];
         my $a = expr_to_str(\@a);
         my $b .= expr_to_str([$$expr[-1]]);
@@ -124,8 +124,15 @@ sub array_to_str {
 }
 
 sub hash_to_str {
-    my $lbr = $$spc{'hash_quote'};
-    return $lbr . chr(ord($lbr)+2);
+    my $expr = $_[0];
+    my $lbr = $$spc{'hash_lit_quote'}//'{';
+    my $res = $lbr;
+    my $i = 1;
+    while ($i < @$expr) {
+        $res .= expr_to_str($$expr[$i]) . ($$spc{'hash_arrow'}//'=>') . expr_to_str($$expr[$i+1]) . ',';
+        $i += 2;
+    }
+    return $res . chr(ord($lbr)+2);
 }
 
 sub var_to_str {
@@ -135,7 +142,7 @@ sub var_to_str {
         $res = $$spc{'varx_start'} . $res;
         for (my $i = 2; $i < @$elem; $i++) {
             my $quote = $$elem[$i][0];
-            $quote = $$spc{'hash_quote'} if $quote eq '{';
+            $quote = ($$spc{'hash_idx_quote'}//'[') if $quote eq '{';
             $res .= $quote . expr_to_str($$elem[$i][1]) . chr(ord($quote)+2);
         }
     }
