@@ -5,6 +5,7 @@ def kws = {
     "if": "p_cond",
     "else": "p_cond",
     "elsif": "p_cond",
+    "for": "p_cond",
     "ret": "p_onekw",
     "break": "p_onekw",
     "cont": "p_onekw"
@@ -155,6 +156,13 @@ fn p_cond(kw, prev) {
         if (!eq(adv(), "("))
             err("expected '(' before condition");
         p_space();
+        if (eq(kw, "for")) {
+            push(res, p_var(p_word()));
+            p_space();
+            if (!eq(adv(), ":"))
+                err("expected ':' in for loop");
+            p_space();
+        }
         push(res, p_expr());
         p_space();
         if (!eq(adv(), ")"))
@@ -382,7 +390,7 @@ fn stmt(prev) {
 
 fn stlist() {
     def res = [];
-    while (1==1) {
+    while (1) {
         p_space();
         if (eq(peek(), "\0") || eq(peek(), "}"))
             break;

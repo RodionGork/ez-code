@@ -1,0 +1,10 @@
+def a = [2,3,5,7,11];
+def s = 0;
+def m = 1;
+for (x : a) {
+    s += x;
+    m *= x;
+}
+writeln(s, ' ', m);
+for (s : ["stop", "the", "world"])
+    writeln(s);

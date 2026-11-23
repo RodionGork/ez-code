@@ -97,11 +97,12 @@ fn call_to_str(expr) {
 fn cond_to_str(st, depth) {
     if (!eq(st[len(st)-1], "blk"))
         push(st, "blk");
-    def kw = st[0];
-    def expr = "";
-    if (!eq(kw, "else"))
-        expr = "(" . expr_to_str(st[1]) . ")";
-    ret getwdef(spc, kw, kw) . $expr . block_to_str(st[len(st)-2], depth);
+    def expr = st[0];
+    if (eq(expr, "for"))
+    	expr = for_head_to_str(var_to_str(st[1]), expr_to_str(st[2]));
+    elsif (!eq(expr, "else"))
+        expr = getwdef(spc, expr, expr) . "(" . expr_to_str(st[1]) . ")";
+    ret expr . block_to_str(st[len(st)-2], depth);
 }
 
 fn def_to_str(expr) {
@@ -160,11 +161,8 @@ fn expr_to_str(expr) {
 
 fn fn_to_str(st, depth) {
     def args = [];
-    def i = 0;
-    while (i < len(st[2])) {
-        push(args, getwdef(spc, "var_start", "") . st[2][i][1]);
-        i += 1;
-    }
+    for (a : st[2])
+        push(args, getwdef(spc, "var_start", "") . a[1]);
     args = "(" . join(",", args) . ")";
     def res = spc{"fn_def"} . " " . st[1];
     def block = block_to_str(st[3], depth);
@@ -175,6 +173,17 @@ fn fn_to_str(st, depth) {
         block = parts[0] . " " . spc{"var_def"} . " " . args . "= \@_;\n" . parts[1];
     }
     ret res . block; 
+}
+
+fn for_head_to_str(var, expr) {
+	def lang = spc{'lang'};
+	if (eq(lang, 'pl'))
+		ret 'for my ' . var . ' (@{' . expr . '})';
+	elsif (eq(lang, 'js'))
+		ret 'for(let ' . var . ' of ' . expr . ')';
+    elsif (eq(lang, 'php'))
+    	ret 'foreach(' . expr . ' as ' . var . ')';
+   	ret 'for ' . var . ' in ' . expr;
 }
 
 fn getwdef(h, k, d) {
@@ -240,22 +249,19 @@ fn stmt_to_str(st, depth) {
         ret fn_to_str(st, depth);
     elsif (eq(st[0], "kw1"))
         ret kw1_to_str(st);
-    elsif (match(st[0], "if|elsif|else|while"))
+    elsif (match(st[0], "if|elsif|else|while|for"))
         ret cond_to_str(st, depth);
     ret "unknown_statement";
 }
 
 fn stlist_to_str(ast, depth) {
     def res = "";
-    def i = 0;
-    while (i < len(ast)) {
-        def st = ast[i];
+    for (st : ast) {
         res .= repstr(" ", depth * indent);
         res .= stmt_to_str(st, depth);
         if (!eq(st[len(st)-1], "blk"))
             res .= ";";
         res .= "\n";
-        i += 1;
     }
     ret res;
 }
@@ -290,22 +296,16 @@ fn ast_to_str(ast, lang, ind, noprefix) {
     spc = specific{lang};
     lib = funclib(lang);
     def libkeys = sort(keys(lib));
-    def i = 0;
-    while (i < len(libkeys)) {
-        def fname = libkeys[i];
+    for (fname : libkeys) {
         if (!isarray(lib{fname}))
             lib{fname} = [lib{fname}, fname];
         push(lib{fname}, 0);
-        i += 1;
     }
     def prefix = getwdef(spc, "header", "");
     def code = stlist_to_str(ast, 0);
-    i = 0;
-    while (i < len(libkeys)) {
-        def fname = libkeys[i];
+    for (fname : libkeys) {
         if (lib{fname}[2] && !noprefix)
             prefix .= lib{fname}[0] . "\n";
-        i += 1;
     }
     ret prefix . code;
 }

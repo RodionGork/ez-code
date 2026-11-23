@@ -5,7 +5,7 @@ sub funclib{ my ($lang)= @_;
   return $$flib{$lang};
 }
 use v5.16;use warnings;
-my $kws={"def"=>"p_def","fn"=>"p_defn","while"=>"p_cond","if"=>"p_cond","else"=>"p_cond","elsif"=>"p_cond","ret"=>"p_onekw","break"=>"p_onekw","cont"=>"p_onekw",};
+my $kws={"def"=>"p_def","fn"=>"p_defn","while"=>"p_cond","if"=>"p_cond","else"=>"p_cond","elsif"=>"p_cond","for"=>"p_cond","ret"=>"p_onekw","break"=>"p_onekw","cont"=>"p_onekw",};
 my $data;
 my $cur=0;
 my $pos=[1,1];
@@ -160,6 +160,14 @@ sub p_cond{ my ($kw,$prev)= @_;
       err("expected '(' before condition");
     }
     p_space();
+    if(streq($kw,"for")){
+      apush($res,p_var(p_word()));
+      p_space();
+      if(!streq(adv(),":")){
+        err("expected ':' in for loop");
+      }
+      p_space();
+    }
     apush($res,p_expr());
     p_space();
     if(!streq(adv(),")")){
@@ -397,7 +405,7 @@ sub stmt{ my ($prev)= @_;
 }
 sub stlist{
   my $res=[];
-  while(1==1){
+  while(1){
     p_space();
     if(streq(peek(),"\0")||streq(peek(),"}")){
       last;
@@ -477,12 +485,14 @@ sub cond_to_str{ my ($st,$depth)= @_;
   if(!streq($$st[len($st)-1],"blk")){
     apush($st,"blk");
   }
-  my $kw=$$st[0];
-  my $expr="";
-  if(!streq($kw,"else")){
-    $expr="(" . expr_to_str($$st[1]) . ")";
+  my $expr=$$st[0];
+  if(streq($expr,"for")){
+    $expr=for_head_to_str(var_to_str($$st[1]),expr_to_str($$st[2]));
   }
-  return getwdef($spc,$kw,$kw) . $expr . block_to_str($$st[len($st)-2],$depth);
+  elsif(!streq($expr,"else")){
+    $expr=getwdef($spc,$expr,$expr) . "(" . expr_to_str($$st[1]) . ")";
+  }
+  return $expr . block_to_str($$st[len($st)-2],$depth);
 }
 sub def_to_str{ my ($expr)= @_;
   my $noinit=streq($$expr[1][0],"var");
@@ -554,10 +564,8 @@ sub expr_to_str{ my ($expr)= @_;
 }
 sub fn_to_str{ my ($st,$depth)= @_;
   my $args=[];
-  my $i=0;
-  while($i<len($$st[2])){
-    apush($args,getwdef($spc,"var_start","") . $$st[2][$i][1]);
-    $i+=1;
+  for my $a (@{$$st[2]}){
+    apush($args,getwdef($spc,"var_start","") . $$a[1]);
   }
   $args="(" . ajoin(",",$args) . ")";
   my $res=$$spc{"fn_def"} . " " . $$st[1];
@@ -570,6 +578,19 @@ sub fn_to_str{ my ($st,$depth)= @_;
     $block=$$parts[0] . " " . $$spc{"var_def"} . " " . $args . "= \@_;\n" . $$parts[1];
   }
   return $res . $block;
+}
+sub for_head_to_str{ my ($var,$expr)= @_;
+  my $lang=$$spc{'lang'};
+  if(streq($lang,'pl')){
+    return 'for my ' . $var . ' (@{' . $expr . '})';
+  }
+  elsif(streq($lang,'js')){
+    return 'for(let ' . $var . ' of ' . $expr . ')';
+  }
+  elsif(streq($lang,'php')){
+    return 'foreach(' . $expr . ' as ' . $var . ')';
+  }
+  return 'for ' . $var . ' in ' . $expr;
 }
 sub getwdef{ my ($h,$k,$d)= @_;
   if(haskey($k,$h)){
@@ -638,23 +659,20 @@ sub stmt_to_str{ my ($st,$depth)= @_;
   elsif(streq($$st[0],"kw1")){
     return kw1_to_str($st);
   }
-  elsif(match($$st[0],"if|elsif|else|while")){
+  elsif(match($$st[0],"if|elsif|else|while|for")){
     return cond_to_str($st,$depth);
   }
   return "unknown_statement";
 }
 sub stlist_to_str{ my ($ast,$depth)= @_;
   my $res="";
-  my $i=0;
-  while($i<len($ast)){
-    my $st=$$ast[$i];
+  for my $st (@{$ast}){
     $res.=repstr(" ",$depth*$indent);
     $res.=stmt_to_str($st,$depth);
     if(!streq($$st[len($st)-1],"blk")){
       $res.=";";
     }
     $res.="\n";
-    $i+=1;
   }
   return $res;
 }
@@ -688,24 +706,18 @@ sub ast_to_str{ my ($ast,$lang,$ind,$noprefix)= @_;
   $spc=$$specific{$lang};
   $lib=funclib($lang);
   my $libkeys=asort(hkeys($lib));
-  my $i=0;
-  while($i<len($libkeys)){
-    my $fname=$$libkeys[$i];
+  for my $fname (@{$libkeys}){
     if(!isarray($$lib{$fname})){
       $$lib{$fname}=[$$lib{$fname},$fname];
     }
     apush($$lib{$fname},0);
-    $i+=1;
   }
   my $prefix=getwdef($spc,"header","");
   my $code=stlist_to_str($ast,0);
-  $i=0;
-  while($i<len($libkeys)){
-    my $fname=$$libkeys[$i];
+  for my $fname (@{$libkeys}){
     if($$lib{$fname}[2]&&!$noprefix){
       $prefix.=$$lib{$fname}[0] . "\n";
     }
-    $i+=1;
   }
   return $prefix . $code;
 }
