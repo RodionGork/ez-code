@@ -22,6 +22,8 @@ def flib = {
     'js': {
         'push': 'function push(a,x){a.push(x)}',
         'len': 'function len(a){return a.length}',
+        'sort': 'function sort(a){return a.toSorted()}',
+        'keys': ['', 'Object.keys'],
         'writeln': 'function writeln(..._){console.log(_.join(""))}',
         'atan2': 'function atan2(a,b){return Math.atan2(a,b)}',
         'int': 'function int(x){return Math.floor(x)}'
@@ -30,10 +32,14 @@ def flib = {
         'push': 'function push(&$a,$x){$a[]=$x;}',
         'len': 'function len($a){return count($a);}',
         'int': 'function int($x){return floor($x);}',
+        'sort': ['function ipsort($a){$res=$a;sort($res);return $res;}', 'ipsort'],
+        'keys': ['', 'array_keys'],
         'writeln': 'function writeln(...$args){echo implode("", $args)."\n";}'
     },
     'py': {
         'push': 'def push(a,x): a.append(x)',
+        'sort': ['', 'sorted'],
+        'keys': 'def keys(a): return a.keys()',
         'writeln': 'def writeln(*args): print(*args, sep="")',
         'atan2': 'def atan2(a,b): return math.atan2(a,b)'
     }

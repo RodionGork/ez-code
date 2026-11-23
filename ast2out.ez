@@ -77,7 +77,8 @@ fn call_to_str(expr) {
     def name = expr[1];
     def definition = getwdef(lib, name, "");
     if (!eq(definition, "")) {
-        definition[2] = 1;
+        if (!eq(definition[0], ''))
+            definition[2] = 1;
         name = definition[1];
     }
     def res = name . "(";
