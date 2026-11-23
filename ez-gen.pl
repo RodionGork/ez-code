@@ -5,7 +5,7 @@ sub funclib{ my ($lang)= @_;
   return $$flib{$lang};
 }
 use v5.16;use warnings;
-my $kws={"def"=>"p_def","fn"=>"p_defn","while"=>"p_cond","if"=>"p_cond","else"=>"p_cond","elsif"=>"p_cond","ret"=>"p_ret","break"=>"p_onekw","cont"=>"p_onekw",};
+my $kws={"def"=>"p_def","fn"=>"p_defn","while"=>"p_cond","if"=>"p_cond","else"=>"p_cond","elsif"=>"p_cond","ret"=>"p_onekw","break"=>"p_onekw","cont"=>"p_onekw",};
 my $data;
 my $cur=0;
 my $pos=[1,1];
@@ -253,7 +253,12 @@ sub p_ex_sum{
   return p_ex_bop("p_ex_mul",'[\+\-\.]',"adv");
 }
 sub p_onekw{ my ($w)= @_;
-  return ["kw1",$w];
+  my $res=['kw1',$w];
+  p_space();
+  if(streq($w,'ret')&&!streq(peek(),';')){
+    apush($res,p_expr());
+  }
+  return $res;
 }
 sub p_num{
   my $n="";
@@ -261,14 +266,6 @@ sub p_num{
     $n.=adv();
   }
   return ["num",$n];
-}
-sub p_ret{
-  my $res=["ret"];
-  p_space();
-  if(!streq(peek(),";")){
-    apush($res,p_expr());
-  }
-  return $res;
 }
 sub p_space{
   while(match(peek(),'[\s#]')){
@@ -415,6 +412,7 @@ my $lib;
 my $spc;
 my $indent;
 my $specific={"pl"=>{"lang"=>"pl","var_start"=>'$',"varx_start"=>'$',"hash_idx_quote"=>"{","var_def"=>"my","fn_def"=>"sub","break"=>"last","cont"=>"next","header"=>"use v5.16;use warnings;\n",},"js"=>{"lang"=>"js","concat_op"=>"+","hash_arrow"=>":","var_def"=>"let","fn_def"=>"function","elsif"=>"else if",},"php"=>{"lang"=>"php","var_start"=>'$',"hash_lit_quote"=>"[","fn_def"=>"function","elsif"=>"elseif","header"=>"<?php\n",},"py"=>{"lang"=>"py","concat_op"=>"+","&&"=>" and ","||"=>" or ","!"=>" not ","hash_arrow"=>":","fn_def"=>"def","elsif"=>"elif","header"=>"import math\n",},};
+my $kw1map={'cont'=>'continue','ret'=>'return',};
 sub array_to_str{ my ($expr)= @_;
   my $res=[];
   my $i=1;
@@ -573,6 +571,15 @@ sub hash_to_str{ my ($expr)= @_;
   }
   return $res . chr(ord($lbr)+2);
 }
+sub kw1_to_str{ my ($expr)= @_;
+  my $res=$$expr[1];
+  $res=getwdef($spc,$res,$res);
+  $res=getwdef($kw1map,$res,$res);
+  if(len($expr)>2){
+    $res.=' ' . expr_to_str($$expr[2]);
+  }
+  return $res;
+}
 sub lit_to_str{ my ($elem)= @_;
   my $q1='"';
   my $q2=$q1;
@@ -613,14 +620,7 @@ sub stmt_to_str{ my ($st,$depth)= @_;
     return fn_to_str($st,$depth);
   }
   elsif(streq($$st[0],"kw1")){
-    return subst(getwdef($spc,$$st[1],$$st[1]),"cont","continue");
-  }
-  elsif(streq($$st[0],"ret")){
-    my $res="return";
-    if(len($st)>1){
-      $res.=" " . expr_to_str($$st[1]);
-    }
-    return $res;
+    return kw1_to_str($st);
   }
   elsif(match($$st[0],"if|elsif|else|while")){
     return cond_to_str($st,$depth);

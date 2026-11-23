@@ -5,7 +5,7 @@ def kws = {
     "if": "p_cond",
     "else": "p_cond",
     "elsif": "p_cond",
-    "ret": "p_ret",
+    "ret": "p_onekw",
     "break": "p_onekw",
     "cont": "p_onekw"
 };
@@ -249,7 +249,11 @@ fn p_ex_sum() {
 }
 
 fn p_onekw(w) {
-    ret ["kw1", w];
+    def res = ['kw1', w];
+    p_space();
+    if (eq(w, 'ret') && !eq(peek(), ';'))
+        push(res, p_expr());
+    ret res;
 }
 
 fn p_num() {
@@ -257,14 +261,6 @@ fn p_num() {
     while (match(peek(), '\d'))
         n .= adv();
     ret ["num", n];
-}
-
-fn p_ret() {
-    def res = ["ret"];
-    p_space();
-    if (!eq(peek(), ";"))
-    	push(res, p_expr());
-    ret res;
 }
 
 fn p_space() {

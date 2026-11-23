@@ -44,6 +44,8 @@ def specific = {
     }
 };
 
+def kw1map = {'cont': 'continue', 'ret': 'return'};
+
 fn array_to_str(expr) {
     def res = [];
     def i = 1;
@@ -190,6 +192,15 @@ fn hash_to_str(expr) {
     ret res . chr(ord(lbr)+2);
 }
 
+fn kw1_to_str(expr) {
+	def res = expr[1];
+	res = getwdef(spc, res, res);
+	res = getwdef(kw1map, res, res);
+    if (len(expr) > 2)
+        res .= ' ' . expr_to_str(expr[2]);
+    ret res;
+}
+
 fn lit_to_str(elem) {
 	def q1 = '"';
 	def q2 = q1;
@@ -226,13 +237,8 @@ fn stmt_to_str(st, depth) {
     elsif (eq(st[0], "defn"))
         ret fn_to_str(st, depth);
     elsif (eq(st[0], "kw1"))
-        ret subst(getwdef(spc, st[1], st[1]), "cont", "continue");
-    elsif (eq(st[0], "ret")) {
-        def res = "return";
-        if (len(st) > 1)
-            res .= " " . expr_to_str(st[1]);
-        ret res;
-    } elsif (match(st[0], "if|elsif|else|while"))
+        ret kw1_to_str(st);
+    elsif (match(st[0], "if|elsif|else|while"))
         ret cond_to_str(st, depth);
     ret "unknown_statement";
 }
