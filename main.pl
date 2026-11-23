@@ -5,9 +5,7 @@ use warnings;
 use JSON::PP;
 use File::Basename;
 use lib dirname(__FILE__);
-require 'ez2ast-gen.pl';
-require 'funclib.pl';
-require 'ast2out-gen.pl';
+require 'ez-gen.pl';
 
 my $lf = funclib('pl');
 for my $fname (keys %$lf) {
