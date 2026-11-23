@@ -260,8 +260,11 @@ fn p_num() {
 }
 
 fn p_ret() {
+    def res = ["ret"];
     p_space();
-    ret ["ret", p_expr()];
+    if (!eq(peek(), ";"))
+    	push(res, p_expr());
+    ret res;
 }
 
 fn p_space() {

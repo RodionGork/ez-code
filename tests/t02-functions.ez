@@ -17,6 +17,13 @@ fn mulstr(s, n) {
     ret res;
 }
 
+fn emptyret() {
+    writeln("visible line");
+    ret;
+    writeln("not visible line");
+}
+
 writeln(sqr(13));
 newline();
 writeln(mulstr("-+- ", 7));
+emptyret();

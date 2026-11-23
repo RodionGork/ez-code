@@ -210,9 +210,12 @@ fn stmt_to_str(st, depth) {
         ret fn_to_str(st, depth);
     elsif (eq(st[0], "kw1"))
         ret subst(getwdef(spc, st[1], st[1]), "cont", "continue");
-    elsif (eq(st[0], "ret"))
-        ret "return " . expr_to_str(st[1]);
-    elsif (match(st[0], "if|elsif|else|while"))
+    elsif (eq(st[0], "ret")) {
+        def res = "return";
+        if (len(st) > 1)
+            res .= " " . expr_to_str(st[1]);
+        ret res;
+    } elsif (match(st[0], "if|elsif|else|while"))
         ret cond_to_str(st, depth);
     ret "unknown_statement";
 }

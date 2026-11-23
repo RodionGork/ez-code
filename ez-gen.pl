@@ -262,8 +262,12 @@ sub p_num{
   return ["num",$n];
 }
 sub p_ret{
+  my $res=["ret"];
   p_space();
-  return ["ret",p_expr()];
+  if(!streq(peek(),";")){
+    apush($res,p_expr());
+  }
+  return $res;
 }
 sub p_space{
   while(match(peek(),"[\\s#]")){
@@ -593,7 +597,11 @@ sub stmt_to_str{ my ($st,$depth)= @_;
     return subst(getwdef($spc,$$st[1],$$st[1]),"cont","continue");
   }
   elsif(streq($$st[0],"ret")){
-    return "return " . expr_to_str($$st[1]);
+    my $res="return";
+    if(len($st)>1){
+      $res.=" " . expr_to_str($$st[1]);
+    }
+    return $res;
   }
   elsif(match($$st[0],"if|elsif|else|while")){
     return cond_to_str($st,$depth);
