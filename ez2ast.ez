@@ -36,7 +36,7 @@ fn err(msg) {
 
 fn fetch_cmp_op() {
     def op = adv();
-    if (match(op, "[\\<\\>]")) {
+    if (match(op, '[\<\>]')) {
         if (eq(peek(), "="))
             op .= adv();
         ret op;
@@ -78,7 +78,7 @@ fn p_asgn(target) {
     p_space();
     def op = adv();
     if (!eq(op, "=")) {
-        if (!match(op, "[\\+\\-\\*\\/%\\.]") || !eq(adv(), "="))
+        if (!match(op, '[\+\-\*\/%\.]') || !eq(adv(), "="))
             err("expected '=' in assignment");
         $op .= "=";
     } 
@@ -92,7 +92,7 @@ fn p_assoc() {
     def res = ["hash"];
     if (!eq(peek(), "}")) {
         while (1) {
-            if (!eq(peek(), "\""))
+            if (!eq(peek(), '"') && !eq(peek(), "'"))
                 err("expected string for key in hash literal");
             push(res, p_str());
             p_space();
@@ -233,19 +233,19 @@ fn p_ex_bop(fnext, expr, fgetop) {
 }
 
 fn p_ex_cmp() {
-    ret p_ex_bop("p_ex_sum", "[\\<\\>\\!=]", "fetch_cmp_op");
+    ret p_ex_bop("p_ex_sum", '[\<\>\!=]', "fetch_cmp_op");
 }
 
 fn p_ex_mul() {
-    ret p_ex_bop("p_value", "[\\*\\/%]", "adv");
+    ret p_ex_bop("p_value", '[\*\/%]', "adv");
 }
 
 fn p_ex_or() {
-    ret p_ex_bop("p_ex_and", "\\|", "fetch_log_op");
+    ret p_ex_bop("p_ex_and", '\|', "fetch_log_op");
 }
 
 fn p_ex_sum() {
-    ret p_ex_bop("p_ex_mul", "[\\+\\-\\.]", "adv");
+    ret p_ex_bop("p_ex_mul", '[\+\-\.]', "adv");
 }
 
 fn p_onekw(w) {
@@ -254,7 +254,7 @@ fn p_onekw(w) {
 
 fn p_num() {
     def n = "";
-    while (match(peek(), "\\d"))
+    while (match(peek(), '\d'))
         n .= adv();
     ret ["num", n];
 }
@@ -268,7 +268,7 @@ fn p_ret() {
 }
 
 fn p_space() {
-    while (match(peek(), "[\\s#]")) {
+    while (match(peek(), '[\s#]')) {
         if (eq(adv(), "#")) {
             while (!eq(peek(), "\n") && !eq(peek(), "\0"))
                 adv();
@@ -295,7 +295,7 @@ fn p_str() {
         }
         res .= c;
     }
-    ret ["str", res];
+    ret ["str", res, quote];
 }
 
 fn p_unary() {
@@ -304,7 +304,7 @@ fn p_unary() {
 }
 
 fn p_value() {
-    if (match(peek(), "[A-Za-z\\\$]")) {
+    if (match(peek(), '[A-Za-z\$]')) {
         def name = p_word();
         p_space();
         if (!eq(peek(), "("))
@@ -312,11 +312,11 @@ fn p_value() {
         else
             ret p_call(name);
     }
-    if (match(peek(), "[\\!\\-]"))
+    if (match(peek(), '[\!\-]'))
         ret p_unary();
-    if (match(peek(), "\\d"))
+    if (match(peek(), '\d'))
         ret p_num();
-    if (eq(peek(), "\""))
+    if (eq(peek(), '"') || eq(peek(), "'"))
         ret p_str();
     if (eq(peek(), "["))
         ret p_array();
@@ -333,12 +333,12 @@ fn p_value() {
 }
 
 fn p_var(name) {
-    ret ["var", subst(name, "^\\\$", "")];
+    ret ["var", subst(name, '^\$', "")];
 }
 
 fn p_var_indexed(name) {
     def var = p_var(name);
-    while (match(peek(), "[\\[\\{]")) {
+    while (match(peek(), '[\[\{]')) {
         def quote = adv();
         p_space();
         push(var, [quote, p_expr()]);
@@ -352,15 +352,15 @@ fn p_var_indexed(name) {
 
 fn p_word() {
     def w = adv(); # may include dollar sign
-    while (match(peek(), "\\w"))
+    while (match(peek(), '\w'))
         w .= adv();
     ret w;
 }
 
 fn stmt(prev) {
     p_space();
-    if (!match(peek(), "[A-Za-z\\\$]"))
-        err("letter or '\$' expected at start of statement");
+    if (!match(peek(), '[A-Za-z\$]'))
+        err('letter or \'$\' expected at start of statement');
     def word = p_word();
     if (haskey(word, kws)) {
         ret callname(kws{word}, [word, prev]);

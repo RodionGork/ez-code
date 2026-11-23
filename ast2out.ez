@@ -6,8 +6,8 @@ def indent;
 def specific = {
     "pl": {
         "lang": "pl",
-        "var_start": "\$",
-        "varx_start": "\$",
+        "var_start": '$',
+        "varx_start": '$',
         "hash_idx_quote": "{",
         "var_def": "my",
         "fn_def": "sub",
@@ -25,7 +25,7 @@ def specific = {
     },
     "php": {
         "lang": "php",
-        "var_start": "\$",
+        "var_start": '$',
         "hash_lit_quote": "[",
         "fn_def": "function",
         "elsif": "elseif",
@@ -64,7 +64,7 @@ fn asgn_to_str(expr) {
 fn block_to_str(content, depth) {
     def res = stlist_to_str(content, depth + 1);
     if (eq(spc{"lang"}, "py")) {
-        res = ":\n" . subst(res, "\\s+\$", "");
+        res = ":\n" . subst(res, '\s+$', "");
     } else {
         res = "{\n" . res . repstr(" ", depth * indent) . "}";
     }
@@ -138,7 +138,7 @@ fn expr_to_str(expr) {
     } elsif (eq(type, "num"))
         ret elem[1];
     elsif (eq(type, "str"))
-        ret "\"" . elem[1] . "\"";
+        ret lit_to_str(elem);
     elsif (eq(type, "var"))
         ret var_to_str(elem);
     elsif (eq(type, "brex"))
@@ -167,7 +167,7 @@ fn fn_to_str(st, depth) {
     if (!eq(spc{"lang"}, "pl"))
         res .= args;
     elsif (!eq(args, "()")) {
-        def parts = split("\\n", block, 2);
+        def parts = split('\n', block, 2);
         block = parts[0] . " " . spc{"var_def"} . " " . args . "= \@_;\n" . parts[1];
     }
     ret res . block; 
@@ -188,6 +188,23 @@ fn hash_to_str(expr) {
         i += 2;
     }
     ret res . chr(ord(lbr)+2);
+}
+
+fn lit_to_str(elem) {
+	def q1 = '"';
+	def q2 = q1;
+	if (!eq(elem[2], '"')) {
+		if (eq(spc{"lang"}, "py"))
+			q1 = ' r"';
+		elsif (eq(spc{"lang"}, "js")) {
+			q1 = " String.raw`";
+			q2 = "`";
+		} else {
+			q1 = "'";
+			q2 = "'";
+		}
+	}
+	ret q1 . elem[1] . q2;
 }
 
 fn repstr(s, n) {

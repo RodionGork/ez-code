@@ -1,5 +1,6 @@
+#generated file, don't edit directly
 use v5.16;use warnings;
-my $flib={"pl"=>{"push"=>["sub apush{push \@{\$_[0]}, \$_[1];}","apush"],"shift"=>["sub ashift{shift \@{\$_[0]};}","ashift"],"unshift"=>["sub aunshift{unshift \@{\$_[0]}, \$_[1];}","aunshift"],"len"=>"sub len{scalar \@{\$_[0]};}","split"=>["sub asplit{my \@res = split(\$_[0],\$_[1],(\$_[2]//0)); \\\@res;}","asplit"],"slice"=>"sub slice{my \@res = \@{\$_[0]}[\$_[1] .. \$_[2]];\\\@res;}","isarray"=>"sub isarray{ref(\$_[0]) eq 'ARRAY';}","join"=>["sub ajoin{join \$_[0], \@{\$_[1]}}","ajoin"],"sort"=>["sub asort{my \@res = sort \@{\$_[0]};\\\@res;}","asort"],"match"=>"sub match{\$_[0] =~ qr/\$_[1]/;}","subst"=>"sub subst{\$_[0] =~ s/\$_[1]/\$_[2]/rg;}","haskey"=>"sub haskey{defined \$_[1]->{\$_[0]};}","keys"=>["sub hkeys{my \@res = keys(%{\$_[0]}); \\\@res;}","hkeys"],"eq"=>["sub streq{\$_[0] eq \$_[1];}","streq"],"scmp"=>"sub scmp{\$_[0] cmp \$_[1];}","halt"=>"sub halt{say(\$_[1]);exit(\$_[0]);}","writeln"=>"sub writeln{say(\@_);}","callname"=>"sub callname{(\\&{\$_[0]})->(\@{\$_[1]});}",},"js"=>{"push"=>"function push(a,x){a.push(x)}","len"=>"function len(a){return a.length}","writeln"=>"function writeln(..._){console.log(_.join(''))}","atan2"=>"function atan2(a,b){return Math.atan2(a,b)}","int"=>"function int(x){return Math.floor(x)}",},"php"=>{"push"=>"function push(&\$a,\$x){\$a[]=\$x;}","len"=>"function len(\$a){return count(\$a);}","int"=>"function int(\$x){return floor(\$x);}","writeln"=>"function writeln(...\$args){echo implode('', \$args).\"\\n\";}",},"py"=>{"push"=>"def push(a,x): a.append(x)","writeln"=>"def writeln(*args): print(*args, sep='')","atan2"=>"def atan2(a,b): return math.atan2(a,b)",},};
+my $flib={'pl'=>{'push'=>['sub apush{push @{$_[0]}, $_[1];}','apush'],'shift'=>['sub ashift{shift @{$_[0]};}','ashift'],'unshift'=>['sub aunshift{unshift @{$_[0]}, $_[1];}','aunshift'],'len'=>'sub len{scalar @{$_[0]};}','split'=>['sub asplit{my @res = split($_[0],$_[1],($_[2]//0)); \@res;}','asplit'],'slice'=>'sub slice{my @res = @{$_[0]}[$_[1] .. $_[2]];\@res;}','isarray'=>'sub isarray{ref($_[0]) eq "ARRAY";}','join'=>['sub ajoin{join $_[0], @{$_[1]}}','ajoin'],'sort'=>['sub asort{my @res = sort @{$_[0]};\@res;}','asort'],'match'=>'sub match{$_[0] =~ qr/$_[1]/;}','subst'=>'sub subst{$_[0] =~ s/$_[1]/$_[2]/rg;}','haskey'=>'sub haskey{defined $_[1]->{$_[0]};}','keys'=>['sub hkeys{my @res = keys(%{$_[0]}); \@res;}','hkeys'],'eq'=>['sub streq{$_[0] eq $_[1];}','streq'],'scmp'=>'sub scmp{$_[0] cmp $_[1];}','halt'=>'sub halt{say($_[1]);exit($_[0]);}','writeln'=>'sub writeln{say(@_);}','callname'=>'sub callname{(\&{$_[0]})->(@{$_[1]});}',},'js'=>{'push'=>'function push(a,x){a.push(x)}','len'=>'function len(a){return a.length}','writeln'=>'function writeln(..._){console.log(_.join(""))}','atan2'=>'function atan2(a,b){return Math.atan2(a,b)}','int'=>'function int(x){return Math.floor(x)}',},'php'=>{'push'=>'function push(&$a,$x){$a[]=$x;}','len'=>'function len($a){return count($a);}','int'=>'function int($x){return floor($x);}','writeln'=>'function writeln(...$args){echo implode("", $args)."\n";}',},'py'=>{'push'=>'def push(a,x): a.append(x)','writeln'=>'def writeln(*args): print(*args, sep="")','atan2'=>'def atan2(a,b): return math.atan2(a,b)',},};
 sub funclib{ my ($lang)= @_;
   return $$flib{$lang};
 }
@@ -28,7 +29,7 @@ sub err{ my ($msg)= @_;
 }
 sub fetch_cmp_op{
   my $op=adv();
-  if(match($op,"[\\<\\>]")){
+  if(match($op,'[\<\>]')){
     if(streq(peek(),"=")){
       $op.=adv();
     }
@@ -73,7 +74,7 @@ sub p_asgn{ my ($target)= @_;
   p_space();
   my $op=adv();
   if(!streq($op,"=")){
-    if(!match($op,"[\\+\\-\\*\\/%\\.]")||!streq(adv(),"=")){
+    if(!match($op,'[\+\-\*\/%\.]')||!streq(adv(),"=")){
       err("expected '=' in assignment");
     }
     $op.="=";
@@ -87,7 +88,7 @@ sub p_assoc{
   my $res=["hash"];
   if(!streq(peek(),"}")){
     while(1){
-      if(!streq(peek(),"\"")){
+      if(!streq(peek(),'"')&&!streq(peek(),"'")){
         err("expected string for key in hash literal");
       }
       apush($res,p_str());
@@ -240,23 +241,23 @@ sub p_ex_bop{ my ($fnext,$expr,$fgetop)= @_;
   return $res;
 }
 sub p_ex_cmp{
-  return p_ex_bop("p_ex_sum","[\\<\\>\\!=]","fetch_cmp_op");
+  return p_ex_bop("p_ex_sum",'[\<\>\!=]',"fetch_cmp_op");
 }
 sub p_ex_mul{
-  return p_ex_bop("p_value","[\\*\\/%]","adv");
+  return p_ex_bop("p_value",'[\*\/%]',"adv");
 }
 sub p_ex_or{
-  return p_ex_bop("p_ex_and","\\|","fetch_log_op");
+  return p_ex_bop("p_ex_and",'\|',"fetch_log_op");
 }
 sub p_ex_sum{
-  return p_ex_bop("p_ex_mul","[\\+\\-\\.]","adv");
+  return p_ex_bop("p_ex_mul",'[\+\-\.]',"adv");
 }
 sub p_onekw{ my ($w)= @_;
   return ["kw1",$w];
 }
 sub p_num{
   my $n="";
-  while(match(peek(),"\\d")){
+  while(match(peek(),'\d')){
     $n.=adv();
   }
   return ["num",$n];
@@ -270,7 +271,7 @@ sub p_ret{
   return $res;
 }
 sub p_space{
-  while(match(peek(),"[\\s#]")){
+  while(match(peek(),'[\s#]')){
     if(streq(adv(),"#")){
       while(!streq(peek(),"\n")&&!streq(peek(),"\0")){
         adv();
@@ -301,14 +302,14 @@ sub p_str{
     }
     $res.=$c;
   }
-  return ["str",$res];
+  return ["str",$res,$quote];
 }
 sub p_unary{
   my $op=adv();
   return ["uop",$op,p_value()];
 }
 sub p_value{
-  if(match(peek(),"[A-Za-z\\\$]")){
+  if(match(peek(),'[A-Za-z\$]')){
     my $name=p_word();
     p_space();
     if(!streq(peek(),"(")){
@@ -318,13 +319,13 @@ sub p_value{
       return p_call($name);
     }
   }
-  if(match(peek(),"[\\!\\-]")){
+  if(match(peek(),'[\!\-]')){
     return p_unary();
   }
-  if(match(peek(),"\\d")){
+  if(match(peek(),'\d')){
     return p_num();
   }
-  if(streq(peek(),"\"")){
+  if(streq(peek(),'"')||streq(peek(),"'")){
     return p_str();
   }
   if(streq(peek(),"[")){
@@ -344,11 +345,11 @@ sub p_value{
   err("value expected in expression");
 }
 sub p_var{ my ($name)= @_;
-  return ["var",subst($name,"^\\\$","")];
+  return ["var",subst($name,'^\$',"")];
 }
 sub p_var_indexed{ my ($name)= @_;
   my $var=p_var($name);
-  while(match(peek(),"[\\[\\{]")){
+  while(match(peek(),'[\[\{]')){
     my $quote=adv();
     p_space();
     apush($var,[$quote,p_expr()]);
@@ -362,15 +363,15 @@ sub p_var_indexed{ my ($name)= @_;
 }
 sub p_word{
   my $w=adv();
-  while(match(peek(),"\\w")){
+  while(match(peek(),'\w')){
     $w.=adv();
   }
   return $w;
 }
 sub stmt{ my ($prev)= @_;
   p_space();
-  if(!match(peek(),"[A-Za-z\\\$]")){
-    err("letter or '\$' expected at start of statement");
+  if(!match(peek(),'[A-Za-z\$]')){
+    err('letter or \'$\' expected at start of statement');
   }
   my $word=p_word();
   if(haskey($word,$kws)){
@@ -413,7 +414,7 @@ use v5.16;use warnings;
 my $lib;
 my $spc;
 my $indent;
-my $specific={"pl"=>{"lang"=>"pl","var_start"=>"\$","varx_start"=>"\$","hash_idx_quote"=>"{","var_def"=>"my","fn_def"=>"sub","break"=>"last","cont"=>"next","header"=>"use v5.16;use warnings;\n",},"js"=>{"lang"=>"js","concat_op"=>"+","hash_arrow"=>":","var_def"=>"let","fn_def"=>"function","elsif"=>"else if",},"php"=>{"lang"=>"php","var_start"=>"\$","hash_lit_quote"=>"[","fn_def"=>"function","elsif"=>"elseif","header"=>"<?php\n",},"py"=>{"lang"=>"py","concat_op"=>"+","&&"=>" and ","||"=>" or ","!"=>" not ","hash_arrow"=>":","fn_def"=>"def","elsif"=>"elif","header"=>"import math\n",},};
+my $specific={"pl"=>{"lang"=>"pl","var_start"=>'$',"varx_start"=>'$',"hash_idx_quote"=>"{","var_def"=>"my","fn_def"=>"sub","break"=>"last","cont"=>"next","header"=>"use v5.16;use warnings;\n",},"js"=>{"lang"=>"js","concat_op"=>"+","hash_arrow"=>":","var_def"=>"let","fn_def"=>"function","elsif"=>"else if",},"php"=>{"lang"=>"php","var_start"=>'$',"hash_lit_quote"=>"[","fn_def"=>"function","elsif"=>"elseif","header"=>"<?php\n",},"py"=>{"lang"=>"py","concat_op"=>"+","&&"=>" and ","||"=>" or ","!"=>" not ","hash_arrow"=>":","fn_def"=>"def","elsif"=>"elif","header"=>"import math\n",},};
 sub array_to_str{ my ($expr)= @_;
   my $res=[];
   my $i=1;
@@ -433,7 +434,7 @@ sub asgn_to_str{ my ($expr)= @_;
 sub block_to_str{ my ($content,$depth)= @_;
   my $res=stlist_to_str($content,$depth+1);
   if(streq($$spc{"lang"},"py")){
-    $res=":\n" . subst($res,"\\s+\$","");
+    $res=":\n" . subst($res,'\s+$',"");
   }
   else{
     $res="{\n" . $res . repstr(" ",$depth*$indent) . "}";
@@ -515,7 +516,7 @@ sub expr_to_str{ my ($expr)= @_;
     return $$elem[1];
   }
   elsif(streq($type,"str")){
-    return "\"" . $$elem[1] . "\"";
+    return lit_to_str($elem);
   }
   elsif(streq($type,"var")){
     return var_to_str($elem);
@@ -551,7 +552,7 @@ sub fn_to_str{ my ($st,$depth)= @_;
     $res.=$args;
   }
   elsif(!streq($args,"()")){
-    my $parts=asplit("\\n",$block,2);
+    my $parts=asplit('\n',$block,2);
     $block=$$parts[0] . " " . $$spc{"var_def"} . " " . $args . "= \@_;\n" . $$parts[1];
   }
   return $res . $block;
@@ -571,6 +572,24 @@ sub hash_to_str{ my ($expr)= @_;
     $i+=2;
   }
   return $res . chr(ord($lbr)+2);
+}
+sub lit_to_str{ my ($elem)= @_;
+  my $q1='"';
+  my $q2=$q1;
+  if(!streq($$elem[2],'"')){
+    if(streq($$spc{"lang"},"py")){
+      $q1=' r"';
+    }
+    elsif(streq($$spc{"lang"},"js")){
+      $q1=" String.raw`";
+      $q2="`";
+    }
+    else{
+      $q1="'";
+      $q2="'";
+    }
+  }
+  return $q1 . $$elem[1] . $q2;
 }
 sub repstr{ my ($s,$n)= @_;
   my $res="";

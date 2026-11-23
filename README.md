@@ -29,6 +29,8 @@ JavaScript, Perl and PHP (a kind of blend).
 - `[3, 1, 4, "pi", ...]` - array literal (e.g. for initializing variable)
 - `{"number":314, "name":"pi", "arr":[1,2,3]}` - hash literal (e.g. associative array)
 - `a{"bla"}[2]` - example of indexing a variable which contains hash of arrays (use curly brackets to index hash, square for array)
+- `"two\nlines"` - double-quoted string respects escape sequences and variable interpolation (in languages that support it)
+- `'single\nline'` - single-quoted string is either "raw" or close to it (slightly depends on language)
 
 Detailed description is to be provided yet, but for now here is an example
 (and others could be found `tests`):
