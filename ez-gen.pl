@@ -75,7 +75,7 @@ sub p_asgn{ my ($target)= @_;
   my $op=adv();
   if(!streq($op,"=")){
     if(!match($op,'[\+\-\*\/%\.]')||!streq(adv(),"=")){
-      err("expected '=' in assignment");
+      err("expected keyword or '=' for assignment");
     }
     $op.="=";
   }
@@ -221,7 +221,22 @@ sub p_defn{
   return $res;
 }
 sub p_expr{
-  return p_ex_or();
+  my $res=p_ex_or();
+  p_space();
+  if(!streq(peek(),'?')){
+    return $res;
+  }
+  adv();
+  $res=['tern',$res];
+  p_space();
+  apush($res,p_expr());
+  p_space();
+  if(!streq(adv(),':')){
+    err("expected ':' in ternary operator");
+  }
+  p_space();
+  apush($res,p_expr());
+  return $res;
 }
 sub p_ex_and{
   return p_ex_bop("p_ex_cmp","&","fetch_log_op");
@@ -378,9 +393,7 @@ sub stmt{ my ($prev)= @_;
   if(streq(peek(),"(")){
     return p_call($word);
   }
-  else{
-    return p_asgn(p_var_indexed($word));
-  }
+  return p_asgn(p_var_indexed($word));
 }
 sub stlist{
   my $res=[];
@@ -509,6 +522,9 @@ sub expr_to_str{ my ($expr)= @_;
   elsif(streq($type,"uop")){
     my $op=$$elem[1];
     return getwdef($spc,$op,$op) . expr_to_str($$elem[2]);
+  }
+  elsif(streq($type,"tern")){
+    return ternary_to_str($elem);
   }
   elsif(streq($type,"num")){
     return $$elem[1];
@@ -641,6 +657,15 @@ sub stlist_to_str{ my ($ast,$depth)= @_;
     $i+=1;
   }
   return $res;
+}
+sub ternary_to_str{ my ($expr)= @_;
+  my $cond=expr_to_str($$expr[1]);
+  my $yes=expr_to_str($$expr[2]);
+  my $no=expr_to_str($$expr[3]);
+  if(!streq($$spc{'lang'},'py')){
+    return $cond . '?' . $yes . ':' . $no;
+  }
+  return $yes . ' if ' . $cond . ' else ' . $no;
 }
 sub var_to_str{ my ($elem)= @_;
   my $res=getwdef($spc,"var_start","") . $$elem[1];

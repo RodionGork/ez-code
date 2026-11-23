@@ -137,7 +137,9 @@ fn expr_to_str(expr) {
     } elsif (eq(type, "uop")) {
         def op = elem[1];
         ret getwdef(spc, op, op) . expr_to_str(elem[2]);
-    } elsif (eq(type, "num"))
+    } elsif(eq(type, "tern"))
+    	ret ternary_to_str(elem);
+    elsif (eq(type, "num"))
         ret elem[1];
     elsif (eq(type, "str"))
         ret lit_to_str(elem);
@@ -256,6 +258,15 @@ fn stlist_to_str(ast, depth) {
         i += 1;
     }
     ret res;
+}
+
+fn ternary_to_str(expr) {
+	def cond = expr_to_str(expr[1]);
+	def yes = expr_to_str(expr[2]);
+	def no = expr_to_str(expr[3]);
+	if (!eq(spc{'lang'}, 'py'))
+		ret cond . '?' . yes . ':' . no;
+	ret yes . ' if ' . cond . ' else ' . no;
 }
 
 fn var_to_str(elem) {

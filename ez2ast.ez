@@ -79,7 +79,7 @@ fn p_asgn(target) {
     def op = adv();
     if (!eq(op, "=")) {
         if (!match(op, '[\+\-\*\/%\.]') || !eq(adv(), "="))
-            err("expected '=' in assignment");
+            err("expected keyword or '=' for assignment");
         $op .= "=";
     } 
     p_space();
@@ -211,7 +211,20 @@ fn p_defn() {
 }
 
 fn p_expr() {
-    ret p_ex_or();
+    def res = p_ex_or();
+    p_space();
+    if (!eq(peek(), '?'))
+        ret res;
+    adv();
+    res = ['tern', res];
+    p_space();
+    push(res, p_expr());
+    p_space();
+    if (!eq(adv(), ':'))
+        err("expected ':' in ternary operator");
+    p_space();
+    push(res, p_expr());
+    ret res;
 }
 
 fn p_ex_and() {
@@ -364,8 +377,7 @@ fn stmt(prev) {
     p_space();
     if (eq(peek(), "("))
         ret p_call(word);
-    else
-        ret p_asgn(p_var_indexed(word));
+    ret p_asgn(p_var_indexed(word));
 }
 
 fn stlist() {
