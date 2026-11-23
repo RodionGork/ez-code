@@ -11,11 +11,27 @@ create their own parts of the game.
 Under development and at the moment without strong feeling that it could be
 completed / perfected to be suitable for any practial purpose.
 
+**Rewritten mostly in itself** - sources of this translator mainly are in
+`*.ez` files from now on (particularly `ez2ast.ez` parses code to AST while
+`ast2out.ez` converts AST to target language) - while `build.sh` file allows
+to generate converted and unified translator "core" in Perl, which is included
+in short `main.pl`.
+
 ### Syntax
 
 We want the language to resemble other C-like languages, so it is similar to
-JavaScript, Perl and PHP (a kind of blend). Detailed description is to be
-provided yet, but for now here is an example (and others could be found `tests`):
+JavaScript, Perl and PHP (a kind of blend).
+
+- `def x;` is a variable definition
+- `def x = ...;` the same with initialization
+- `fn myfunc(a, b, c) {...}` - function definition
+- `if`, `else`, `elsif`, `while`, `ret` (return), `break`, `cont` (continue) - typical keywords
+- `[3, 1, 4, "pi", ...]` - array literal (e.g. for initializing variable)
+- `{"number":314, "name":"pi", "arr":[1,2,3]}` - hash literal (e.g. associative array)
+- `a{"bla"}[2]` - example of indexing a variable which contains hash of arrays (use curly brackets to index hash, square for array)
+
+Detailed description is to be provided yet, but for now here is an example
+(and others could be found `tests`):
 
 ```
 # calculates first prime numbers and prints the last generated
@@ -66,6 +82,10 @@ To print output to console don't specify file name, but add the desired language
 flag:
 
     perl main.pl tests/t03-collatz.ez -js
+
+This could be then redirected to chosen interpreter (to "run on the fly"):
+
+    perl main.pl tests/t03-collatz.ez -js | node
 
 Language flag could be one of `-pl`, `-js`, `-php`, `-py` and `-ast`. The latter
 actually dumps JSON abstract syntax tree without converting it further to
