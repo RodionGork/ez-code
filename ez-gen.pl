@@ -115,12 +115,13 @@ sub p_assoc{
   return $res;
 }
 sub p_block{ my ($res)= @_;
+  my $startline=$$pos[0];
   adv();
   apush($res,stlist());
   apush($res,"blk");
   p_space();
   if(!streq(adv(),"}")){
-    err("expected '}' to end block");
+    err("expected '}' to end block (started around line " . $startline . ')');
   }
 }
 sub p_call{ my ($fname)= @_;

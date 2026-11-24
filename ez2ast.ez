@@ -116,12 +116,13 @@ fn p_assoc() {
 }
 
 fn p_block(res) {
+    def startline = pos[0];
     adv(); # opening '{'
     push(res, stlist());
     push(res, "blk");
     p_space();
     if (!eq(adv(), "}"))
-        err("expected '}' to end block");
+        err("expected '}' to end block (started around line " . startline . ')');
 }
 
 fn p_call(fname) {
