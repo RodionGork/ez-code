@@ -5,7 +5,7 @@ sub funclib{ my ($lang)= @_;
   return $$flib{$lang};
 }
 use v5.16;use warnings;
-my $kws={"def"=>"p_def","fn"=>"p_defn","while"=>"p_cond","if"=>"p_cond","else"=>"p_cond","elsif"=>"p_cond","for"=>"p_cond","ret"=>"p_onekw","break"=>"p_onekw","cont"=>"p_onekw",};
+my $kws={'def'=>'p_def','fn'=>'p_defn','while'=>'p_cond','if'=>'p_cond','else'=>'p_cond','elsif'=>'p_cond','for'=>'p_cond','ret'=>'p_onekw','break'=>'p_onekw','cont'=>'p_onekw',};
 my $data;
 my $cur=0;
 my $pos=[1,1];
@@ -25,42 +25,42 @@ sub peek{
   return $$data[$cur];
 }
 sub err{ my ($msg)= @_;
-  halt(1,$msg . " at " . ajoin(":",$pos));
+  halt(1,$msg . ' at ' . ajoin(':',$pos));
 }
 sub fetch_cmp_op{
   my $op=adv();
   if(match($op,'[\<\>]')){
-    if(streq(peek(),"=")){
+    if(streq(peek(),'=')){
       $op.=adv();
     }
     return $op;
   }
-  if(!streq(adv(),"=")){
-    err("unknown comparison operator");
+  if(!streq(adv(),'=')){
+    err('unknown comparison operator');
   }
-  return $op . "=";
+  return $op . '=';
 }
 sub fetch_log_op{
   my $op=adv();
   if(!streq(adv(),$op)){
-    err("unknown logic operator");
+    err('unknown logic operator');
   }
   return $op . $op;
 }
 sub p_array{
   adv();
   p_space();
-  my $res=["array"];
-  if(!streq(peek(),"]")){
+  my $res=['array'];
+  if(!streq(peek(),']')){
     while(1){
       apush($res,p_expr());
       p_space();
       my $rbr=adv();
-      if(streq($rbr,"]")){
+      if(streq($rbr,']')){
         last;
       }
-      if(!streq($rbr,",")){
-        err("expected ']' or ',' in array literal");
+      if(!streq($rbr,',')){
+        err('expected "]" or "," in array literal');
       }
       p_space();
     }
@@ -73,38 +73,38 @@ sub p_array{
 sub p_asgn{ my ($target)= @_;
   p_space();
   my $op=adv();
-  if(!streq($op,"=")){
-    if(!match($op,'[\+\-\*\/%\.]')||!streq(adv(),"=")){
-      err("expected keyword or '=' for assignment");
+  if(!streq($op,'=')){
+    if(!match($op,'[\+\-\*\/%\.]')||!streq(adv(),'=')){
+      err('expected keyword or "=" for assignment');
     }
-    $op.="=";
+    $op.='=';
   }
   p_space();
-  return ["asgn",$target,$op,p_expr()];
+  return ['asgn',$target,$op,p_expr()];
 }
 sub p_assoc{
   adv();
   p_space();
-  my $res=["hash"];
-  if(!streq(peek(),"}")){
+  my $res=['hash'];
+  if(!streq(peek(),'}')){
     while(1){
       if(!streq(peek(),'"')&&!streq(peek(),"'")){
-        err("expected string for key in hash literal");
+        err('expected string for key in hash literal');
       }
       apush($res,p_str());
       p_space();
-      if(!streq(adv(),":")){
-        err("expected ':' after key in hash literal");
+      if(!streq(adv(),':')){
+        err('expected ":" after key in hash literal');
       }
       p_space();
       apush($res,p_expr());
       p_space();
       my $rbr=adv();
-      if(streq($rbr,"}")){
+      if(streq($rbr,'}')){
         last;
       }
-      if(!streq($rbr,",")){
-        err("expected '}' or ',' in hash literal");
+      if(!streq($rbr,',')){
+        err('expected "}" or "," in hash literal');
       }
       p_space();
     }
@@ -118,29 +118,29 @@ sub p_block{ my ($res)= @_;
   my $startline=$$pos[0];
   adv();
   apush($res,stlist());
-  apush($res,"blk");
+  apush($res,'blk');
   p_space();
-  if(!streq(adv(),"}")){
-    err("expected '}' to end block (started around line " . $startline . ')');
+  if(!streq(adv(),'}')){
+    err('expected "}" to end block (started around line ' . $startline . ')');
   }
 }
 sub p_call{ my ($fname)= @_;
   p_space();
-  if(!streq(adv(),"(")){
-    err("expected '(' for function call");
+  if(!streq(adv(),'(')){
+    err('expected "(" for function call');
   }
   my $args=[];
   p_space();
-  if(!streq(peek(),")")){
+  if(!streq(peek(),')')){
     while(1){
       apush($args,p_expr());
       p_space();
       my $rbr=adv();
-      if(streq($rbr,")")){
+      if(streq($rbr,')')){
         last;
       }
-      if(!streq($rbr,",")){
-        err("expected ')' or ',' in argument list");
+      if(!streq($rbr,',')){
+        err('expected ")" or "," in argument list');
       }
       p_space();
     }
@@ -148,35 +148,35 @@ sub p_call{ my ($fname)= @_;
   else{
     adv();
   }
-  return ["call",$fname,$args];
+  return ['call',$fname,$args];
 }
 sub p_cond{ my ($kw,$prev)= @_;
   my $res=[$kw];
-  if(match($kw,"else|elsif")&&(len($prev)==0||!match($$prev[len($prev)-1][0],"if|elsif"))){
-    err($kw . " without preceding if");
+  if(match($kw,'else|elsif')&&(len($prev)==0||!match($$prev[len($prev)-1][0],'if|elsif'))){
+    err($kw . ' without preceding if');
   }
   p_space();
-  if(!streq($kw,"else")){
-    if(!streq(adv(),"(")){
-      err("expected '(' before condition");
+  if(!streq($kw,'else')){
+    if(!streq(adv(),'(')){
+      err('expected "(" before condition');
     }
     p_space();
-    if(streq($kw,"for")){
+    if(streq($kw,'for')){
       apush($res,p_var(p_word()));
       p_space();
-      if(!streq(adv(),":")){
-        err("expected ':' in for loop");
+      if(!streq(adv(),':')){
+        err('expected ":" in for loop');
       }
       p_space();
     }
     apush($res,p_expr());
     p_space();
-    if(!streq(adv(),")")){
-      err("expected ')' after condition");
+    if(!streq(adv(),')')){
+      err('expected ")" after condition');
     }
     p_space();
   }
-  if(streq(peek(),"{")){
+  if(streq(peek(),'{')){
     p_block($res);
   }
   else{
@@ -188,32 +188,32 @@ sub p_def{
   p_space();
   my $var=p_var(p_word());
   p_space();
-  if(streq(peek(),"=")){
+  if(streq(peek(),'=')){
     $var=p_asgn($var);
   }
-  return ["def",$var];
+  return ['def',$var];
 }
 sub p_defn{
   p_space();
   my $name=p_word();
   p_space();
-  if(!streq(peek(),"(")){
-    err("expected '(' in function definition");
+  if(!streq(peek(),'(')){
+    err('expected "(" in function definition');
   }
   adv();
   p_space();
   my $args=[];
   p_space();
-  if(!streq(peek(),")")){
+  if(!streq(peek(),')')){
     while(1){
       apush($args,p_var(p_word()));
       p_space();
       my $rbr=adv();
-      if(streq($rbr,")")){
+      if(streq($rbr,')')){
         last;
       }
-      if(!streq($rbr,",")){
-        err("expected ')' or ',' in func arguments");
+      if(!streq($rbr,',')){
+        err('expected ")" or "," in func arguments');
       }
       p_space();
     }
@@ -222,10 +222,10 @@ sub p_defn{
     adv();
   }
   p_space();
-  if(!streq(adv(),"{")){
-    err("expected '{' to start func body");
+  if(!streq(adv(),'{')){
+    err('expected "{" to start func body');
   }
-  my $res=["defn",$name,$args];
+  my $res=['defn',$name,$args];
   p_block($res);
   return $res;
 }
@@ -241,20 +241,20 @@ sub p_expr{
   apush($res,p_expr());
   p_space();
   if(!streq(adv(),':')){
-    err("expected ':' in ternary operator");
+    err('expected ":" in ternary operator');
   }
   p_space();
   apush($res,p_expr());
   return $res;
 }
 sub p_ex_and{
-  return p_ex_bop("p_ex_cmp","&","fetch_log_op");
+  return p_ex_bop('p_ex_cmp','&','fetch_log_op');
 }
 sub p_ex_bop{ my ($fnext,$expr,$fgetop)= @_;
   my $res=[callname($fnext,[])];
   p_space();
   while(match(peek(),$expr)){
-    aunshift($res,["op",callname($fgetop,[])]);
+    aunshift($res,['op',callname($fgetop,[])]);
     p_space();
     apush($res,callname($fnext,[]));
     p_space();
@@ -265,16 +265,16 @@ sub p_ex_bop{ my ($fnext,$expr,$fgetop)= @_;
   return $res;
 }
 sub p_ex_cmp{
-  return p_ex_bop("p_ex_sum",'[\<\>\!=]',"fetch_cmp_op");
+  return p_ex_bop('p_ex_sum','[\<\>\!=]','fetch_cmp_op');
 }
 sub p_ex_mul{
-  return p_ex_bop("p_value",'[\*\/%]',"adv");
+  return p_ex_bop('p_value','[\*\/%]','adv');
 }
 sub p_ex_or{
-  return p_ex_bop("p_ex_and",'\|',"fetch_log_op");
+  return p_ex_bop('p_ex_and','\|','fetch_log_op');
 }
 sub p_ex_sum{
-  return p_ex_bop("p_ex_mul",'[\+\-\.]',"adv");
+  return p_ex_bop('p_ex_mul','[\+\-\.]','adv');
 }
 sub p_onekw{ my ($w)= @_;
   my $res=['kw1',$w];
@@ -310,11 +310,11 @@ sub p_num{
       $n.=adv();
     }
   }
-  return ["num",$n];
+  return ['num',$n];
 }
 sub p_space{
   while(match(peek(),'[\s#]')){
-    if(streq(adv(),"#")){
+    if(streq(adv(),'#')){
       while(!streq(peek(),"\n")&&!streq(peek(),"\0")){
         adv();
       }
@@ -323,13 +323,13 @@ sub p_space{
 }
 sub p_str{
   my $quote=adv();
-  my $res="";
+  my $res='';
   my $esc=0;
-  my $start=ajoin(":",$pos);
+  my $start=ajoin(':',$pos);
   while(1){
     my $c=adv();
     if(streq($c,"\0")){
-      err("unterminated string literal starting at " . $start);
+      err('unterminated string literal starting at ' . $start);
     }
     if(!$esc){
       if(streq($c,$quote)){
@@ -344,17 +344,17 @@ sub p_str{
     }
     $res.=$c;
   }
-  return ["str",$res,$quote];
+  return ['str',$res,$quote];
 }
 sub p_unary{
   my $op=adv();
-  return ["uop",$op,p_value()];
+  return ['uop',$op,p_value()];
 }
 sub p_value{
   if(match(peek(),'[A-Za-z\$]')){
     my $name=p_word();
     p_space();
-    if(!streq(peek(),"(")){
+    if(!streq(peek(),'(')){
       return p_var_indexed($name);
     }
     else{
@@ -370,24 +370,24 @@ sub p_value{
   if(streq(peek(),'"')||streq(peek(),"'")){
     return p_str();
   }
-  if(streq(peek(),"[")){
+  if(streq(peek(),'[')){
     return p_array();
   }
-  if(streq(peek(),"{")){
+  if(streq(peek(),'{')){
     return p_assoc();
   }
-  if(streq(adv(),"(")){
+  if(streq(adv(),'(')){
     my $ex=p_expr();
     p_space();
-    if(!streq(adv(),")")){
-      err("expected ')' to end subexpression");
+    if(!streq(adv(),')')){
+      err('expected ")" to end subexpression');
     }
-    return ["brex",$ex];
+    return ['brex',$ex];
   }
-  err("value expected in expression");
+  err('value expected in expression');
 }
 sub p_var{ my ($name)= @_;
-  return ["var",subst($name,'^\$',"")];
+  return ['var',subst($name,'^\$','')];
 }
 sub p_var_indexed{ my ($name)= @_;
   my $var=p_var($name);
@@ -398,7 +398,7 @@ sub p_var_indexed{ my ($name)= @_;
     p_space();
     $quote=chr(ord($quote)+2);
     if(!streq(adv(),$quote)){
-      err("expected '. quote . ' after index expression");
+      err('expected ' . $quote . ' after index expression');
     }
   }
   return $var;
@@ -420,7 +420,7 @@ sub stmt{ my ($prev)= @_;
     return callname($$kws{$word},[$word,$prev]);
   }
   p_space();
-  if(streq(peek(),"(")){
+  if(streq(peek(),'(')){
     return p_call($word);
   }
   return p_asgn(p_var_indexed($word));
@@ -429,24 +429,24 @@ sub stlist{
   my $res=[];
   while(1){
     p_space();
-    if(streq(peek(),"\0")||streq(peek(),"}")){
+    if(streq(peek(),"\0")||streq(peek(),'}')){
       last;
     }
     my $st=stmt($res);
     apush($res,$st);
     p_space();
-    if(!streq($$st[len($st)-1],"blk")&&!streq(adv(),";")){
-      err("expected ';' at the end of statement");
+    if(!streq($$st[len($st)-1],'blk')&&!streq(adv(),';')){
+      err('expected ";" at the end of statement');
     }
   }
   return $res;
 }
 sub to_ast{ my ($code)= @_;
-  $data=asplit("",$code);
+  $data=asplit('',$code);
   apush($data,"\0");
   my $ast=stlist();
   if(!streq(peek(),"\0")){
-    err("statement expected");
+    err('statement expected');
   }
   return $ast;
 }
@@ -454,7 +454,7 @@ use v5.16;use warnings;
 my $lib;
 my $spc;
 my $indent;
-my $specific={"pl"=>{"lang"=>"pl","var_start"=>'$',"varx_start"=>'$',"hash_idx_quote"=>"{","var_def"=>"my","fn_def"=>"sub","break"=>"last","cont"=>"next","header"=>"use v5.16;use warnings;\n",},"js"=>{"lang"=>"js","concat_op"=>"+","hash_arrow"=>":","var_def"=>"let","fn_def"=>"function","elsif"=>"else if",},"php"=>{"lang"=>"php","var_start"=>'$',"hash_lit_quote"=>"[","fn_def"=>"function","elsif"=>"elseif","header"=>"<?php\n",},"py"=>{"lang"=>"py","concat_op"=>"+","&&"=>" and ","||"=>" or ","!"=>" not ","hash_arrow"=>":","fn_def"=>"def","elsif"=>"elif","header"=>"import math\n",},};
+my $specific={'pl'=>{'lang'=>'pl','var_start'=>'$','varx_start'=>'$','hash_idx_quote'=>'{','var_def'=>'my','fn_def'=>'sub','break'=>'last','cont'=>'next','header'=>"use v5.16;use warnings;\n",},'js'=>{'lang'=>'js','concat_op'=>'+','hash_arrow'=>':','var_def'=>'let','fn_def'=>'function','elsif'=>'else if',},'php'=>{'lang'=>'php','var_start'=>'$','hash_lit_quote'=>'[','fn_def'=>'function','elsif'=>'elseif','header'=>"<?php\n",},'py'=>{'lang'=>'py','concat_op'=>'+','&&'=>' and ','||'=>' or ','!'=>' not ','hash_arrow'=>':','fn_def'=>'def','elsif'=>'elif','header'=>"import math\n",},};
 my $kw1map={'cont'=>'continue','ret'=>'return',};
 sub array_to_str{ my ($expr)= @_;
   my $res=[];
@@ -463,35 +463,35 @@ sub array_to_str{ my ($expr)= @_;
     apush($res,expr_to_str($$expr[$i]));
     $i+=1;
   }
-  return "[" . ajoin(",",$res) . "]";
+  return '[' . ajoin(',',$res) . ']';
 }
 sub asgn_to_str{ my ($expr)= @_;
   my $op=$$expr[2];
-  if(streq($op,".=")){
-    $op=getwdef($spc,"concat_op",".") . "=";
+  if(streq($op,'.=')){
+    $op=getwdef($spc,'concat_op','.') . '=';
   }
   return expr_to_str($$expr[1]) . $op . expr_to_str($$expr[3]);
 }
 sub block_to_str{ my ($content,$depth)= @_;
   my $res=stlist_to_str($content,$depth+1);
-  if(streq($$spc{"lang"},"py")){
-    $res=":\n" . subst($res,'\s+$',"");
+  if(streq($$spc{'lang'},'py')){
+    $res=":\n" . subst($res,'\s+$','');
   }
   else{
-    $res="{\n" . $res . repstr(" ",$depth*$indent) . "}";
+    $res="{\n" . $res . repstr(' ',$depth*$indent) . '}';
   }
   return $res;
 }
 sub call_to_str{ my ($expr)= @_;
   my $name=$$expr[1];
-  my $definition=getwdef($lib,$name,"");
-  if(!streq($definition,"")){
+  my $definition=getwdef($lib,$name,'');
+  if(!streq($definition,'')){
     if(!streq($$definition[0],'')){
       $$definition[2]=1;
     }
     $name=$$definition[1];
   }
-  my $res=$name . "(";
+  my $res=$name . '(';
   if(len($$expr[2])!=0){
     my $i=0;
     while(1){
@@ -500,34 +500,34 @@ sub call_to_str{ my ($expr)= @_;
       if($i>=len($$expr[2])){
         last;
       }
-      $res.=",";
+      $res.=',';
     }
   }
-  return $res . ")";
+  return $res . ')';
 }
 sub cond_to_str{ my ($st,$depth)= @_;
-  if(!streq($$st[len($st)-1],"blk")){
-    apush($st,"blk");
+  if(!streq($$st[len($st)-1],'blk')){
+    apush($st,'blk');
   }
   my $expr=$$st[0];
-  if(streq($expr,"for")){
+  if(streq($expr,'for')){
     $expr=for_head_to_str(var_to_str($$st[1]),expr_to_str($$st[2]));
   }
-  elsif(!streq($expr,"else")){
-    $expr=getwdef($spc,$expr,$expr) . "(" . expr_to_str($$st[1]) . ")";
+  elsif(!streq($expr,'else')){
+    $expr=getwdef($spc,$expr,$expr) . '(' . expr_to_str($$st[1]) . ')';
   }
   return $expr . block_to_str($$st[len($st)-2],$depth);
 }
 sub def_to_str{ my ($expr)= @_;
-  my $noinit=streq($$expr[1][0],"var");
-  my $kw=getwdef($spc,"var_def","");
-  if(streq($kw,"")){
+  my $noinit=streq($$expr[1][0],'var');
+  my $kw=getwdef($spc,'var_def','');
+  if(streq($kw,'')){
     if($noinit){
       return 0;
     }
   }
   else{
-    $kw.=" ";
+    $kw.=' ';
   }
   if($noinit){
     return $kw . var_to_str($$expr[1]);
@@ -540,66 +540,66 @@ sub expr_to_str{ my ($expr)= @_;
   }
   my $elem=$$expr[0];
   my $type=$$elem[0];
-  if(streq($type,"op")){
+  if(streq($type,'op')){
     my $a=expr_to_str(slice($expr,1,len($expr)-2));
     my $b=expr_to_str([$$expr[len($expr)-1]]);
     my $op=$$elem[1];
-    if(streq($op,".")){
-      $op=getwdef($spc,"concat_op"," . ");
-      if(streq($$spc{"lang"},"py")){
-        $a="str(" . $a . ")";
-        $b="str(" . $b . ")";
+    if(streq($op,'.')){
+      $op=getwdef($spc,'concat_op',' . ');
+      if(streq($$spc{'lang'},'py')){
+        $a='str(' . $a . ')';
+        $b='str(' . $b . ')';
       }
     }
     return $a . getwdef($spc,$op,$op) . $b;
   }
-  elsif(streq($type,"uop")){
+  elsif(streq($type,'uop')){
     my $op=$$elem[1];
     return getwdef($spc,$op,$op) . expr_to_str($$elem[2]);
   }
-  elsif(streq($type,"tern")){
+  elsif(streq($type,'tern')){
     return ternary_to_str($elem);
   }
-  elsif(streq($type,"num")){
+  elsif(streq($type,'num')){
     return $$elem[1];
   }
-  elsif(streq($type,"str")){
+  elsif(streq($type,'str')){
     return lit_to_str($elem);
   }
-  elsif(streq($type,"var")){
+  elsif(streq($type,'var')){
     return var_to_str($elem);
   }
-  elsif(streq($type,"brex")){
-    return "(" . expr_to_str($$elem[1]) . ")";
+  elsif(streq($type,'brex')){
+    return '(' . expr_to_str($$elem[1]) . ')';
   }
-  elsif(streq($type,"call")){
+  elsif(streq($type,'call')){
     return call_to_str($elem);
   }
-  elsif(streq($type,"array")){
+  elsif(streq($type,'array')){
     return array_to_str($elem);
   }
-  elsif(streq($type,"hash")){
+  elsif(streq($type,'hash')){
     return hash_to_str($elem);
   }
   elsif(isarray($$elem[1])){
     return expr_to_str($elem);
   }
-  halt("unexpected expression element: " . $type);
+  halt('unexpected expression element: ' . $type);
 }
 sub fn_to_str{ my ($st,$depth)= @_;
   my $args=[];
   for my $a (@{$$st[2]}){
-    apush($args,getwdef($spc,"var_start","") . $$a[1]);
+    apush($args,getwdef($spc,'var_start','') . $$a[1]);
   }
-  $args="(" . ajoin(",",$args) . ")";
-  my $res=$$spc{"fn_def"} . " " . $$st[1];
+  $args='(' . ajoin(',',$args) . ')';
+  my $res=$$spc{'fn_def'} . ' ' . $$st[1];
   my $block=block_to_str($$st[3],$depth);
-  if(!streq($$spc{"lang"},"pl")){
+  if(!streq($$spc{'lang'},'pl')){
     $res.=$args;
   }
-  elsif(!streq($args,"()")){
+  elsif(!streq($args,'()')){
     my $parts=asplit('\n',$block,2);
-    $block=$$parts[0] . " " . $$spc{"var_def"} . " " . $args . "= \@_;\n" . $$parts[1];
+    $block=$$parts[0] . ' ' . $$spc{'var_def'} . ' ' . $args . "= \@_;\n" . $$parts[1];
   }
   return $res . $block;
 }
@@ -623,11 +623,11 @@ sub getwdef{ my ($h,$k,$d)= @_;
   return $d;
 }
 sub hash_to_str{ my ($expr)= @_;
-  my $lbr=getwdef($spc,"hash_lit_quote","{");
+  my $lbr=getwdef($spc,'hash_lit_quote','{');
   my $res=$lbr;
   my $i=1;
   while($i<len($expr)){
-    $res.=expr_to_str($$expr[$i]) . getwdef($spc,"hash_arrow","=>") . expr_to_str($$expr[$i+1]) . ",";
+    $res.=expr_to_str($$expr[$i]) . getwdef($spc,'hash_arrow','=>') . expr_to_str($$expr[$i+1]) . ',';
     $i+=2;
   }
   return $res . chr(ord($lbr)+2);
@@ -646,12 +646,12 @@ sub lit_to_str{ my ($elem)= @_;
   my $q2=$q1;
   if(streq($$elem[2],"'")){
     my $backslashed=match($$elem[1],'\\\\');
-    if(streq($$spc{"lang"},"py")&&$backslashed){
+    if(streq($$spc{'lang'},'py')&&$backslashed){
       $q1=' r"';
     }
-    elsif(streq($$spc{"lang"},"js")&&$backslashed){
-      $q1=" String.raw`";
-      $q2="`";
+    elsif(streq($$spc{'lang'},'js')&&$backslashed){
+      $q1=' String.raw`';
+      $q2='`';
     }
     else{
       $q1="'";
@@ -661,7 +661,7 @@ sub lit_to_str{ my ($elem)= @_;
   return $q1 . $$elem[1] . $q2;
 }
 sub repstr{ my ($s,$n)= @_;
-  my $res="";
+  my $res='';
   while($n>0){
     $res.=$s;
     $n-=1;
@@ -669,33 +669,33 @@ sub repstr{ my ($s,$n)= @_;
   return $res;
 }
 sub stmt_to_str{ my ($st,$depth)= @_;
-  if(streq($$st[0],"call")){
+  if(streq($$st[0],'call')){
     return call_to_str($st);
   }
-  elsif(streq($$st[0],"asgn")){
+  elsif(streq($$st[0],'asgn')){
     return asgn_to_str($st);
   }
-  elsif(streq($$st[0],"def")){
+  elsif(streq($$st[0],'def')){
     return def_to_str($st);
   }
-  elsif(streq($$st[0],"defn")){
+  elsif(streq($$st[0],'defn')){
     return fn_to_str($st,$depth);
   }
-  elsif(streq($$st[0],"kw1")){
+  elsif(streq($$st[0],'kw1')){
     return kw1_to_str($st);
   }
-  elsif(match($$st[0],"if|elsif|else|while|for")){
+  elsif(match($$st[0],'if|elsif|else|while|for')){
     return cond_to_str($st,$depth);
   }
-  return "unknown_statement";
+  return 'unknown_statement';
 }
 sub stlist_to_str{ my ($ast,$depth)= @_;
-  my $res="";
+  my $res='';
   for my $st (@{$ast}){
-    $res.=repstr(" ",$depth*$indent);
+    $res.=repstr(' ',$depth*$indent);
     $res.=stmt_to_str($st,$depth);
-    if(!streq($$st[len($st)-1],"blk")){
-      $res.=";";
+    if(!streq($$st[len($st)-1],'blk')){
+      $res.=';';
     }
     $res.="\n";
   }
@@ -711,14 +711,14 @@ sub ternary_to_str{ my ($expr)= @_;
   return $yes . ' if ' . $cond . ' else ' . $no;
 }
 sub var_to_str{ my ($elem)= @_;
-  my $res=getwdef($spc,"var_start","") . $$elem[1];
+  my $res=getwdef($spc,'var_start','') . $$elem[1];
   if(len($elem)>2){
-    $res=getwdef($spc,"varx_start","") . $res;
+    $res=getwdef($spc,'varx_start','') . $res;
     my $i=2;
     while($i<len($elem)){
       my $quote=$$elem[$i][0];
-      if(streq($quote,"{")){
-        $quote=getwdef($spc,"hash_idx_quote","[");
+      if(streq($quote,'{')){
+        $quote=getwdef($spc,'hash_idx_quote','[');
       }
       $res.=$quote . expr_to_str($$elem[$i][1]) . chr(ord($quote)+2);
       $i+=1;
@@ -737,7 +737,7 @@ sub ast_to_str{ my ($ast,$lang,$ind,$noprefix)= @_;
     }
     apush($$lib{$fname},0);
   }
-  my $prefix=getwdef($spc,"header","");
+  my $prefix=getwdef($spc,'header','');
   my $code=stlist_to_str($ast,0);
   for my $fname (@{$libkeys}){
     if($$lib{$fname}[2]&&!$noprefix){

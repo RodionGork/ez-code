@@ -4,43 +4,43 @@ def spc;
 def indent;
 
 def specific = {
-    "pl": {
-        "lang": "pl",
-        "var_start": '$',
-        "varx_start": '$',
-        "hash_idx_quote": "{",
-        "var_def": "my",
-        "fn_def": "sub",
-        "break": "last",
-        "cont": "next",
-        "header": "use v5.16;use warnings;\n"
+    'pl': {
+        'lang': 'pl',
+        'var_start': '$',
+        'varx_start': '$',
+        'hash_idx_quote': '{',
+        'var_def': 'my',
+        'fn_def': 'sub',
+        'break': 'last',
+        'cont': 'next',
+        'header': "use v5.16;use warnings;\n"
     },
-    "js": {
-        "lang": "js",
-        "concat_op": "+",
-        "hash_arrow": ":",
-        "var_def": "let",
-        "fn_def": "function",
-        "elsif": "else if"
+    'js': {
+        'lang': 'js',
+        'concat_op': '+',
+        'hash_arrow': ':',
+        'var_def': 'let',
+        'fn_def': 'function',
+        'elsif': 'else if'
     },
-    "php": {
-        "lang": "php",
-        "var_start": '$',
-        "hash_lit_quote": "[",
-        "fn_def": "function",
-        "elsif": "elseif",
-        "header": "<?php\n"
+    'php': {
+        'lang': 'php',
+        'var_start': '$',
+        'hash_lit_quote': '[',
+        'fn_def': 'function',
+        'elsif': 'elseif',
+        'header': "<?php\n"
     },
-    "py": {
-        "lang": "py",
-        "concat_op": "+",
-        "&&": " and ",
-        "||": " or ",
-        "!": " not ",
-        "hash_arrow": ":",
-        "fn_def": "def",
-        "elsif": "elif",
-        "header": "import math\n"
+    'py': {
+        'lang': 'py',
+        'concat_op': '+',
+        '&&': ' and ',
+        '||': ' or ',
+        '!': ' not ',
+        'hash_arrow': ':',
+        'fn_def': 'def',
+        'elsif': 'elif',
+        'header': "import math\n"
     }
 };
 
@@ -53,35 +53,35 @@ fn array_to_str(expr) {
         push(res, expr_to_str(expr[i]));
         i += 1;
     }
-    ret "[" . join(",", res) . "]";
+    ret '[' . join(',', res) . ']';
 }
 
 fn asgn_to_str(expr) {
     def op = expr[2];
-    if (eq(op, ".="))
-        op = getwdef(spc, "concat_op", ".") . "="; 
+    if (eq(op, '.='))
+        op = getwdef(spc, 'concat_op', '.') . '='; 
     ret expr_to_str(expr[1]) . op . expr_to_str(expr[3]);
 }
 
 fn block_to_str(content, depth) {
     def res = stlist_to_str(content, depth + 1);
-    if (eq(spc{"lang"}, "py")) {
-        res = ":\n" . subst(res, '\s+$', "");
+    if (eq(spc{'lang'}, 'py')) {
+        res = ":\n" . subst(res, '\s+$', '');
     } else {
-        res = "{\n" . res . repstr(" ", depth * indent) . "}";
+        res = "{\n" . res . repstr(' ', depth * indent) . '}';
     }
     ret res;
 }
 
 fn call_to_str(expr) {
     def name = expr[1];
-    def definition = getwdef(lib, name, "");
-    if (!eq(definition, "")) {
+    def definition = getwdef(lib, name, '');
+    if (!eq(definition, '')) {
         if (!eq(definition[0], ''))
             definition[2] = 1;
         name = definition[1];
     }
-    def res = name . "(";
+    def res = name . '(';
     if (len(expr[2]) != 0) {
         def i = 0;
         while (1) {
@@ -89,31 +89,31 @@ fn call_to_str(expr) {
             i += 1;
             if (i >= len(expr[2]))
                 break;
-            res .= ",";
+            res .= ',';
         }
     }
-    ret res . ")";
+    ret res . ')';
 }
 
 fn cond_to_str(st, depth) {
-    if (!eq(st[len(st)-1], "blk"))
-        push(st, "blk");
+    if (!eq(st[len(st)-1], 'blk'))
+        push(st, 'blk');
     def expr = st[0];
-    if (eq(expr, "for"))
+    if (eq(expr, 'for'))
     	expr = for_head_to_str(var_to_str(st[1]), expr_to_str(st[2]));
-    elsif (!eq(expr, "else"))
-        expr = getwdef(spc, expr, expr) . "(" . expr_to_str(st[1]) . ")";
+    elsif (!eq(expr, 'else'))
+        expr = getwdef(spc, expr, expr) . '(' . expr_to_str(st[1]) . ')';
     ret expr . block_to_str(st[len(st)-2], depth);
 }
 
 fn def_to_str(expr) {
-    def noinit = eq(expr[1][0], "var");
-    def kw = getwdef(spc, "var_def", "");
-    if (eq(kw, "")) {
+    def noinit = eq(expr[1][0], 'var');
+    def kw = getwdef(spc, 'var_def', '');
+    if (eq(kw, '')) {
         if (noinit)
             ret 0;
     } else
-        kw .= " ";
+        kw .= ' ';
     if (noinit)
         ret kw . var_to_str(expr[1]);
     ret kw . asgn_to_str(expr[1]);
@@ -124,54 +124,54 @@ fn expr_to_str(expr) {
         expr = [expr];
     def elem = expr[0];
     def type = elem[0];
-    if (eq(type,"op")) {
+    if (eq(type,'op')) {
         def a = expr_to_str(slice(expr, 1, len(expr)-2));
         def b = expr_to_str([expr[len(expr)-1]]);
         def op = elem[1];
-        if (eq(op, ".")) {
-        	op = getwdef(spc, "concat_op", " . ");
-        	if (eq(spc{"lang"}, "py")) {
-        	    a = "str(" . a . ")";
-        	    b = "str(" . b . ")";
+        if (eq(op, '.')) {
+        	op = getwdef(spc, 'concat_op', ' . ');
+        	if (eq(spc{'lang'}, 'py')) {
+        	    a = 'str(' . a . ')';
+        	    b = 'str(' . b . ')';
         	}
         }
         ret a . getwdef(spc, op, op) . b;
-    } elsif (eq(type, "uop")) {
+    } elsif (eq(type, 'uop')) {
         def op = elem[1];
         ret getwdef(spc, op, op) . expr_to_str(elem[2]);
-    } elsif(eq(type, "tern"))
+    } elsif(eq(type, 'tern'))
     	ret ternary_to_str(elem);
-    elsif (eq(type, "num"))
+    elsif (eq(type, 'num'))
         ret elem[1];
-    elsif (eq(type, "str"))
+    elsif (eq(type, 'str'))
         ret lit_to_str(elem);
-    elsif (eq(type, "var"))
+    elsif (eq(type, 'var'))
         ret var_to_str(elem);
-    elsif (eq(type, "brex"))
-        ret "(" . expr_to_str(elem[1]) . ")";
-    elsif (eq(type, "call"))
+    elsif (eq(type, 'brex'))
+        ret '(' . expr_to_str(elem[1]) . ')';
+    elsif (eq(type, 'call'))
         ret call_to_str(elem);
-    elsif (eq(type, "array"))
+    elsif (eq(type, 'array'))
         ret array_to_str(elem);
-    elsif (eq(type, "hash"))
+    elsif (eq(type, 'hash'))
         ret hash_to_str(elem);
     elsif (isarray(elem[1]))
         ret expr_to_str(elem);
-    halt("unexpected expression element: " . type);
+    halt('unexpected expression element: ' . type);
 }
 
 fn fn_to_str(st, depth) {
     def args = [];
     for (a : st[2])
-        push(args, getwdef(spc, "var_start", "") . a[1]);
-    args = "(" . join(",", args) . ")";
-    def res = spc{"fn_def"} . " " . st[1];
+        push(args, getwdef(spc, 'var_start', '') . a[1]);
+    args = '(' . join(',', args) . ')';
+    def res = spc{'fn_def'} . ' ' . st[1];
     def block = block_to_str(st[3], depth);
-    if (!eq(spc{"lang"}, "pl"))
+    if (!eq(spc{'lang'}, 'pl'))
         res .= args;
-    elsif (!eq(args, "()")) {
+    elsif (!eq(args, '()')) {
         def parts = split('\n', block, 2);
-        block = parts[0] . " " . spc{"var_def"} . " " . args . "= \@_;\n" . parts[1];
+        block = parts[0] . ' ' . spc{'var_def'} . ' ' . args . "= \@_;\n" . parts[1];
     }
     ret res . block; 
 }
@@ -194,11 +194,11 @@ fn getwdef(h, k, d) {
 }
 
 fn hash_to_str(expr) {
-    def lbr = getwdef(spc, "hash_lit_quote", "{");
+    def lbr = getwdef(spc, 'hash_lit_quote', '{');
     def res = lbr;
     def i = 1;
     while (i < len(expr)) {
-        res .= expr_to_str(expr[i]) . getwdef(spc, "hash_arrow", "=>") . expr_to_str(expr[i+1]) . ",";
+        res .= expr_to_str(expr[i]) . getwdef(spc, 'hash_arrow', '=>') . expr_to_str(expr[i+1]) . ',';
         i += 2;
     }
     ret res . chr(ord(lbr)+2);
@@ -218,11 +218,11 @@ fn lit_to_str(elem) {
 	def q2 = q1;
 	if (eq(elem[2], "'")) {
 		def backslashed = match(elem[1], '\\\\');
-		if (eq(spc{"lang"}, "py") && backslashed)
+		if (eq(spc{'lang'}, 'py') && backslashed)
 			q1 = ' r"';
-		elsif (eq(spc{"lang"}, "js") && backslashed) {
-			q1 = " String.raw`";
-			q2 = "`";
+		elsif (eq(spc{'lang'}, 'js') && backslashed) {
+			q1 = ' String.raw`';
+			q2 = '`';
 		} else {
 			q1 = "'";
 			q2 = "'";
@@ -232,7 +232,7 @@ fn lit_to_str(elem) {
 }
 
 fn repstr(s, n) {
-    def res = "";
+    def res = '';
     while (n > 0) {
         res .= s;
         n -= 1;
@@ -241,28 +241,28 @@ fn repstr(s, n) {
 }
 
 fn stmt_to_str(st, depth) {
-    if (eq(st[0], "call"))
+    if (eq(st[0], 'call'))
         ret call_to_str(st);
-    elsif (eq(st[0], "asgn"))
+    elsif (eq(st[0], 'asgn'))
         ret asgn_to_str(st);
-    elsif (eq(st[0], "def"))
+    elsif (eq(st[0], 'def'))
         ret def_to_str(st);
-    elsif (eq(st[0], "defn"))
+    elsif (eq(st[0], 'defn'))
         ret fn_to_str(st, depth);
-    elsif (eq(st[0], "kw1"))
+    elsif (eq(st[0], 'kw1'))
         ret kw1_to_str(st);
-    elsif (match(st[0], "if|elsif|else|while|for"))
+    elsif (match(st[0], 'if|elsif|else|while|for'))
         ret cond_to_str(st, depth);
-    ret "unknown_statement";
+    ret 'unknown_statement';
 }
 
 fn stlist_to_str(ast, depth) {
-    def res = "";
+    def res = '';
     for (st : ast) {
-        res .= repstr(" ", depth * indent);
+        res .= repstr(' ', depth * indent);
         res .= stmt_to_str(st, depth);
-        if (!eq(st[len(st)-1], "blk"))
-            res .= ";";
+        if (!eq(st[len(st)-1], 'blk'))
+            res .= ';';
         res .= "\n";
     }
     ret res;
@@ -278,14 +278,14 @@ fn ternary_to_str(expr) {
 }
 
 fn var_to_str(elem) {
-    def res = getwdef(spc, "var_start", "") . elem[1];
+    def res = getwdef(spc, 'var_start', '') . elem[1];
     if (len(elem) > 2) {
-        res = getwdef(spc, "varx_start", "") . res;
+        res = getwdef(spc, 'varx_start', '') . res;
         def i = 2;
         while (i < len(elem)) {
             def quote = elem[i][0];
-            if (eq(quote, "{"))
-                quote = getwdef(spc, "hash_idx_quote", "[");
+            if (eq(quote, '{'))
+                quote = getwdef(spc, 'hash_idx_quote', '[');
             res .= quote . expr_to_str(elem[i][1]) . chr(ord(quote)+2);
             i += 1;
         }
@@ -303,7 +303,7 @@ fn ast_to_str(ast, lang, ind, noprefix) {
             lib{fname} = [lib{fname}, fname];
         push(lib{fname}, 0);
     }
-    def prefix = getwdef(spc, "header", "");
+    def prefix = getwdef(spc, 'header', '');
     def code = stlist_to_str(ast, 0);
     for (fname : libkeys) {
         if (lib{fname}[2] && !noprefix)

@@ -1,14 +1,14 @@
 def kws = {
-    "def": "p_def",
-    "fn": "p_defn",
-    "while": "p_cond",
-    "if": "p_cond",
-    "else": "p_cond",
-    "elsif": "p_cond",
-    "for": "p_cond",
-    "ret": "p_onekw",
-    "break": "p_onekw",
-    "cont": "p_onekw"
+    'def': 'p_def',
+    'fn': 'p_defn',
+    'while': 'p_cond',
+    'if': 'p_cond',
+    'else': 'p_cond',
+    'elsif': 'p_cond',
+    'for': 'p_cond',
+    'ret': 'p_onekw',
+    'break': 'p_onekw',
+    'cont': 'p_onekw'
 };
 
 def data;
@@ -32,41 +32,41 @@ fn peek() {
 }
 
 fn err(msg) {
-    halt(1, msg . " at " . join(":", pos));
+    halt(1, msg . ' at ' . join(':', pos));
 }
 
 fn fetch_cmp_op() {
     def op = adv();
     if (match(op, '[\<\>]')) {
-        if (eq(peek(), "="))
+        if (eq(peek(), '='))
             op .= adv();
         ret op;
     }
-    if (!eq(adv(), "="))
-        err("unknown comparison operator");
-    ret op . "=";
+    if (!eq(adv(), '='))
+        err('unknown comparison operator');
+    ret op . '=';
 }
 
 fn fetch_log_op() {
     def op = adv();
     if (!eq(adv(), op))
-        err("unknown logic operator");
+        err('unknown logic operator');
     ret op . op;
 }
 
 fn p_array() {
     adv();
     p_space();
-    def res = ["array"];
-    if (!eq(peek(), "]")) {
+    def res = ['array'];
+    if (!eq(peek(), ']')) {
         while (1) {
             push(res, p_expr());
             p_space();
             def rbr = adv();
-            if (eq(rbr, "]"))
+            if (eq(rbr, ']'))
                 break;
-            if (!eq(rbr, ","))
-                err("expected ']' or ',' in array literal");
+            if (!eq(rbr, ','))
+                err('expected "]" or "," in array literal');
             p_space();
         }
     } else {
@@ -78,35 +78,35 @@ fn p_array() {
 fn p_asgn(target) {
     p_space();
     def op = adv();
-    if (!eq(op, "=")) {
-        if (!match(op, '[\+\-\*\/%\.]') || !eq(adv(), "="))
-            err("expected keyword or '=' for assignment");
-        $op .= "=";
+    if (!eq(op, '=')) {
+        if (!match(op, '[\+\-\*\/%\.]') || !eq(adv(), '='))
+            err('expected keyword or "=" for assignment');
+        $op .= '=';
     } 
     p_space();
-    ret ["asgn", target, op, p_expr()];
+    ret ['asgn', target, op, p_expr()];
 }
 
 fn p_assoc() {
     adv();
     p_space();
-    def res = ["hash"];
-    if (!eq(peek(), "}")) {
+    def res = ['hash'];
+    if (!eq(peek(), '}')) {
         while (1) {
             if (!eq(peek(), '"') && !eq(peek(), "'"))
-                err("expected string for key in hash literal");
+                err('expected string for key in hash literal');
             push(res, p_str());
             p_space();
-            if (!eq(adv(), ":"))
-                err("expected ':' after key in hash literal");
+            if (!eq(adv(), ':'))
+                err('expected ":" after key in hash literal');
             p_space();
             push(res, p_expr());
             p_space();
             def rbr = adv();
-            if (eq(rbr, "}"))
+            if (eq(rbr, '}'))
                 break;
-            if (!eq(rbr, ","))
-                err("expected '}' or ',' in hash literal");
+            if (!eq(rbr, ','))
+                err('expected "}" or "," in hash literal');
             p_space();
         }
     } else {
@@ -119,58 +119,58 @@ fn p_block(res) {
     def startline = pos[0];
     adv(); # opening '{'
     push(res, stlist());
-    push(res, "blk");
+    push(res, 'blk');
     p_space();
-    if (!eq(adv(), "}"))
-        err("expected '}' to end block (started around line " . startline . ')');
+    if (!eq(adv(), '}'))
+        err('expected "}" to end block (started around line ' . startline . ')');
 }
 
 fn p_call(fname) {
     p_space();
-    if (!eq(adv(), "("))
-        err("expected '(' for function call");
+    if (!eq(adv(), '('))
+        err('expected "(" for function call');
     def args = [];
     p_space();
-    if (!eq(peek(), ")")) {
+    if (!eq(peek(), ')')) {
         while (1) {
             push(args, p_expr());
             p_space();
             def rbr = adv();
-            if (eq(rbr, ")"))
+            if (eq(rbr, ')'))
                 break;
-            if (!eq(rbr, ","))
-                err("expected ')' or ',' in argument list");
+            if (!eq(rbr, ','))
+                err('expected ")" or "," in argument list');
             p_space();
         }
     } else {
         adv();
     }
-    ret ["call", fname, args];
+    ret ['call', fname, args];
 }
 
 fn p_cond(kw, prev) {
     def res = [kw];
-    if (match(kw, "else|elsif") && (len(prev) == 0 || !match(prev[len(prev)-1][0], "if|elsif")))
-        err(kw . " without preceding if") ;
+    if (match(kw, 'else|elsif') && (len(prev) == 0 || !match(prev[len(prev)-1][0], 'if|elsif')))
+        err(kw . ' without preceding if') ;
     p_space();
-    if (!eq(kw, "else")) {
-        if (!eq(adv(), "("))
-            err("expected '(' before condition");
+    if (!eq(kw, 'else')) {
+        if (!eq(adv(), '('))
+            err('expected "(" before condition');
         p_space();
-        if (eq(kw, "for")) {
+        if (eq(kw, 'for')) {
             push(res, p_var(p_word()));
             p_space();
-            if (!eq(adv(), ":"))
-                err("expected ':' in for loop");
+            if (!eq(adv(), ':'))
+                err('expected ":" in for loop');
             p_space();
         }
         push(res, p_expr());
         p_space();
-        if (!eq(adv(), ")"))
-            err("expected ')' after condition");
+        if (!eq(adv(), ')'))
+            err('expected ")" after condition');
         p_space();
     }
-    if (eq(peek(), "{")) {
+    if (eq(peek(), '{')) {
         p_block(res);
     } else {
         push(res, [stmt()]);
@@ -182,39 +182,39 @@ fn p_def() {
     p_space();
     def var = p_var(p_word());
     p_space();
-    if (eq(peek(), "="))
+    if (eq(peek(), '='))
         var = p_asgn(var);
-    ret ["def", var];
+    ret ['def', var];
 }
 
 fn p_defn() {
     p_space();
     def name = p_word();
     p_space();
-    if (!eq(peek(), "("))
-        err("expected '(' in function definition");
+    if (!eq(peek(), '('))
+        err('expected "(" in function definition');
     adv();
     p_space();
     def args = [];
     p_space();
-    if (!eq(peek(), ")")) {
+    if (!eq(peek(), ')')) {
         while (1) {
             push(args, p_var(p_word()));
             p_space();
             def rbr = adv();
-            if (eq(rbr, ")"))
+            if (eq(rbr, ')'))
                 break;
-            if (!eq(rbr, ","))
-                err("expected ')' or ',' in func arguments");
+            if (!eq(rbr, ','))
+                err('expected ")" or "," in func arguments');
             p_space();
         }
     } else {
         adv();
     }
     p_space();
-    if (!eq(adv(), "{"))
-        err("expected '{' to start func body");
-    def res = ["defn", name, args];
+    if (!eq(adv(), '{'))
+        err('expected "{" to start func body');
+    def res = ['defn', name, args];
     p_block(res);
     ret res;
 }
@@ -230,21 +230,21 @@ fn p_expr() {
     push(res, p_expr());
     p_space();
     if (!eq(adv(), ':'))
-        err("expected ':' in ternary operator");
+        err('expected ":" in ternary operator');
     p_space();
     push(res, p_expr());
     ret res;
 }
 
 fn p_ex_and() {
-    ret p_ex_bop("p_ex_cmp", "&", "fetch_log_op");
+    ret p_ex_bop('p_ex_cmp', '&', 'fetch_log_op');
 }
 
 fn p_ex_bop(fnext, expr, fgetop) {
     def res = [callname(fnext, [])];
     p_space();
     while (match(peek(), expr)) {
-        unshift(res, ["op", callname(fgetop, [])]);
+        unshift(res, ['op', callname(fgetop, [])]);
         p_space();
         push(res, callname(fnext, []));
         p_space();
@@ -255,19 +255,19 @@ fn p_ex_bop(fnext, expr, fgetop) {
 }
 
 fn p_ex_cmp() {
-    ret p_ex_bop("p_ex_sum", '[\<\>\!=]', "fetch_cmp_op");
+    ret p_ex_bop('p_ex_sum', '[\<\>\!=]', 'fetch_cmp_op');
 }
 
 fn p_ex_mul() {
-    ret p_ex_bop("p_value", '[\*\/%]', "adv");
+    ret p_ex_bop('p_value', '[\*\/%]', 'adv');
 }
 
 fn p_ex_or() {
-    ret p_ex_bop("p_ex_and", '\|', "fetch_log_op");
+    ret p_ex_bop('p_ex_and', '\|', 'fetch_log_op');
 }
 
 fn p_ex_sum() {
-    ret p_ex_bop("p_ex_mul", '[\+\-\.]', "adv");
+    ret p_ex_bop('p_ex_mul', '[\+\-\.]', 'adv');
 }
 
 fn p_onekw(w) {
@@ -298,12 +298,12 @@ fn p_num() {
         while (match(peek(), '\d'))
             n .= adv();
     }
-    ret ["num", n];
+    ret ['num', n];
 }
 
 fn p_space() {
     while (match(peek(), '[\s#]')) {
-        if (eq(adv(), "#")) {
+        if (eq(adv(), '#')) {
             while (!eq(peek(), "\n") && !eq(peek(), "\0"))
                 adv();
         }
@@ -312,13 +312,13 @@ fn p_space() {
 
 fn p_str() {
     def quote = adv();
-    def res = "";
+    def res = '';
     def esc = 0;
-    def start = join(":", pos);
+    def start = join(':', pos);
     while (1) {
         def c = adv();
         if (eq(c, "\0"))
-            err("unterminated string literal starting at " . start);
+            err('unterminated string literal starting at ' . start);
         if (!esc) {
             if (eq(c, quote))
                 break;
@@ -329,19 +329,19 @@ fn p_str() {
         }
         res .= c;
     }
-    ret ["str", res, quote];
+    ret ['str', res, quote];
 }
 
 fn p_unary() {
     def op = adv();
-    ret ["uop", op, p_value()];
+    ret ['uop', op, p_value()];
 }
 
 fn p_value() {
     if (match(peek(), '[A-Za-z\$]')) {
         def name = p_word();
         p_space();
-        if (!eq(peek(), "("))
+        if (!eq(peek(), '('))
             ret p_var_indexed(name);
         else
             ret p_call(name);
@@ -352,22 +352,22 @@ fn p_value() {
         ret p_num();
     if (eq(peek(), '"') || eq(peek(), "'"))
         ret p_str();
-    if (eq(peek(), "["))
+    if (eq(peek(), '['))
         ret p_array();
-    if (eq(peek(), "{"))
+    if (eq(peek(), '{'))
         ret p_assoc();
-    if (eq(adv(), "(")) {
+    if (eq(adv(), '(')) {
         def ex = p_expr();
         p_space();
-        if (!eq(adv(), ")"))
-            err("expected ')' to end subexpression");
-        ret ["brex", ex];
+        if (!eq(adv(), ')'))
+            err('expected ")" to end subexpression');
+        ret ['brex', ex];
     }
-    err("value expected in expression");
+    err('value expected in expression');
 }
 
 fn p_var(name) {
-    ret ["var", subst(name, '^\$', "")];
+    ret ['var', subst(name, '^\$', '')];
 }
 
 fn p_var_indexed(name) {
@@ -379,7 +379,7 @@ fn p_var_indexed(name) {
         p_space();
         quote = chr(ord(quote)+2);
         if (!eq(adv(), quote))
-            err("expected '. quote . ' after index expression");
+            err('expected '. quote . ' after index expression');
     }
     ret var;
 }
@@ -400,7 +400,7 @@ fn stmt(prev) {
         ret callname(kws{word}, [word, prev]);
     }
     p_space();
-    if (eq(peek(), "("))
+    if (eq(peek(), '('))
         ret p_call(word);
     ret p_asgn(p_var_indexed(word));
 }
@@ -409,24 +409,24 @@ fn stlist() {
     def res = [];
     while (1) {
         p_space();
-        if (eq(peek(), "\0") || eq(peek(), "}"))
+        if (eq(peek(), "\0") || eq(peek(), '}'))
             break;
         def st = stmt(res);
         push(res, st);
         p_space();
-        if (!eq(st[len(st)-1], "blk") && !eq(adv(), ";")) {
-            err("expected ';' at the end of statement");
+        if (!eq(st[len(st)-1], 'blk') && !eq(adv(), ';')) {
+            err('expected ";" at the end of statement');
         }
     }
     ret res;
 }
 
 fn to_ast(code) {
-    data = split("", code);
+    data = split('', code);
     push(data, "\0");
     def ast = stlist();
     if (!eq(peek(), "\0"))
-    	err("statement expected");
+    	err('statement expected');
     ret ast;
 }
 
