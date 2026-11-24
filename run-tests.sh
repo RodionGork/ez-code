@@ -13,10 +13,12 @@ cmdrun="cmd$lang"
 cmdrun=${!cmdrun}
 
 for f in tests/*.ez; do
-  if grep -q "notest:$lang" $f; then
-    continue
+  expname="${f%.*}.$lang.txt"
+  if [ -f $expname ]; then
+    expect=$(cat $expname)
+  else
+    expect=$(cat "${f%.*}.txt")
   fi
-  expect=$(cat "${f%.*}.txt")
   actual=$(./main.pl $f -$lang | $cmdrun)
   if [ "$expect" != "$actual" ]; then
     echo -n "[FAIL]"

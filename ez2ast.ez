@@ -278,9 +278,25 @@ fn p_onekw(w) {
 }
 
 fn p_num() {
-    def n = "";
+    def n = '';
     while (match(peek(), '\d'))
         n .= adv();
+    if (eq(peek(), '.')) {
+        n .= adv();
+        while (match(peek(), '\d'))
+            n .= adv();
+        if (eq(n, '.'))
+            err('expected digits before or after decimal point to form number');
+    }
+    if (eq(peek(), 'e') || eq(peek(), 'E')) {
+        n .= adv();
+        if (eq(peek(), '+') || eq(peek(), '-'))
+            n .= adv();
+        if (!match(peek(), '\d'))
+            err('digit expected in number exponent part');
+        while (match(peek(), '\d'))
+            n .= adv();
+    }
     ret ["num", n];
 }
 
@@ -331,7 +347,7 @@ fn p_value() {
     }
     if (match(peek(), '[\!\-]'))
         ret p_unary();
-    if (match(peek(), '\d'))
+    if (match(peek(), '[\d\.]'))
         ret p_num();
     if (eq(peek(), '"') || eq(peek(), "'"))
         ret p_str();

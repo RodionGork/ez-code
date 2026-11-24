@@ -284,9 +284,30 @@ sub p_onekw{ my ($w)= @_;
   return $res;
 }
 sub p_num{
-  my $n="";
+  my $n='';
   while(match(peek(),'\d')){
     $n.=adv();
+  }
+  if(streq(peek(),'.')){
+    $n.=adv();
+    while(match(peek(),'\d')){
+      $n.=adv();
+    }
+    if(streq($n,'.')){
+      err('expected digits before or after decimal point to form number');
+    }
+  }
+  if(streq(peek(),'e')||streq(peek(),'E')){
+    $n.=adv();
+    if(streq(peek(),'+')||streq(peek(),'-')){
+      $n.=adv();
+    }
+    if(!match(peek(),'\d')){
+      err('digit expected in number exponent part');
+    }
+    while(match(peek(),'\d')){
+      $n.=adv();
+    }
   }
   return ["num",$n];
 }
@@ -342,7 +363,7 @@ sub p_value{
   if(match(peek(),'[\!\-]')){
     return p_unary();
   }
-  if(match(peek(),'\d')){
+  if(match(peek(),'[\d\.]')){
     return p_num();
   }
   if(streq(peek(),'"')||streq(peek(),"'")){
