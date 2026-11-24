@@ -644,11 +644,12 @@ sub kw1_to_str{ my ($expr)= @_;
 sub lit_to_str{ my ($elem)= @_;
   my $q1='"';
   my $q2=$q1;
-  if(!streq($$elem[2],'"')){
-    if(streq($$spc{"lang"},"py")){
+  if(streq($$elem[2],"'")){
+    my $backslashed=match($$elem[1],'\\\\');
+    if(streq($$spc{"lang"},"py")&&$backslashed){
       $q1=' r"';
     }
-    elsif(streq($$spc{"lang"},"js")){
+    elsif(streq($$spc{"lang"},"js")&&$backslashed){
       $q1=" String.raw`";
       $q2="`";
     }

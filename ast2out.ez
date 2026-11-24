@@ -216,10 +216,11 @@ fn kw1_to_str(expr) {
 fn lit_to_str(elem) {
 	def q1 = '"';
 	def q2 = q1;
-	if (!eq(elem[2], '"')) {
-		if (eq(spc{"lang"}, "py"))
+	if (eq(elem[2], "'")) {
+		def backslashed = match(elem[1], '\\\\');
+		if (eq(spc{"lang"}, "py") && backslashed)
 			q1 = ' r"';
-		elsif (eq(spc{"lang"}, "js")) {
+		elsif (eq(spc{"lang"}, "js") && backslashed) {
 			q1 = " String.raw`";
 			q2 = "`";
 		} else {
