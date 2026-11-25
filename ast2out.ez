@@ -73,6 +73,36 @@ fn block_to_str(content, depth) {
     ret res;
 }
 
+fn calc_globals(fnst) {
+    def vars = {};
+    for (a : fnst[2])
+        vars{a[1]} = -1;
+    vars = calc_vars(fnst[3], vars);
+    def glo = [];
+    for (name : keys(vars))
+        if (vars{name} > 0)
+            push(glo, name);
+    ret glo;
+}
+
+fn calc_vars(arr, vars) {
+    if (len(arr) == 0)
+        ret vars;
+    if (eq(arr[0], 'var')) {
+        def name = arr[1];
+        if (!haskey(name, vars))
+            vars{name} = 1;
+    } elsif (eq(arr[0], 'def')) {
+        def name = (eq(arr[1][0], 'var')) ? arr[1][1] : arr[1][1][1];
+        vars{name} = -1;
+    } else {
+        for (x : arr)
+            if (isarray(x))
+                vars = calc_vars(x, vars);
+    }
+    ret vars;
+}
+
 fn call_to_str(expr) {
     def name = expr[1];
     def definition = getwdef(lib, name, '');
@@ -111,7 +141,7 @@ fn def_to_str(expr) {
     def kw = getwdef(spc, 'var_def', '');
     if (eq(kw, '')) {
         if (noinit)
-            ret 0;
+            ret '';
     } else
         kw .= ' ';
     if (noinit)
@@ -164,6 +194,9 @@ fn fn_to_str(st, depth) {
     def args = [];
     for (a : st[2])
         push(args, getwdef(spc, 'var_start', '') . a[1]);
+    def globals = calc_globals(st);
+    if (len(globals) > 0 && match(spc{'lang'}, 'php|py'))
+        unshift(st[3], ['global', globals]);
     args = '(' . join(',', args) . ')';
     def res = spc{'fn_def'} . ' ' . st[1];
     def block = block_to_str(st[3], depth);
@@ -191,6 +224,11 @@ fn getwdef(h, k, d) {
     if (haskey(k, h))
         ret h{k};
     ret d;
+}
+
+fn globals_to_str(names) {
+    def vs = getwdef(spc, 'var_start', '');
+    ret 'global ' . vs . join(',' . vs, names);
 }
 
 fn hash_to_str(expr) {
@@ -253,14 +291,18 @@ fn stmt_to_str(st, depth) {
         ret kw1_to_str(st);
     elsif (match(st[0], 'if|elsif|else|while|for'))
         ret cond_to_str(st, depth);
+    elsif (eq(st[0], 'global'))
+        ret globals_to_str(st[1]);
     ret 'unknown_statement';
 }
 
 fn stlist_to_str(ast, depth) {
     def res = '';
     for (st : ast) {
-        res .= repstr(' ', depth * indent);
-        res .= stmt_to_str(st, depth);
+        def ststr = stmt_to_str(st, depth);
+        if (eq(ststr, ''))
+            cont;
+        res .= repstr(' ', depth * indent) . ststr;
         if (!eq(st[len(st)-1], 'blk'))
             res .= ';';
         res .= "\n";

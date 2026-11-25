@@ -482,6 +482,43 @@ sub block_to_str{ my ($content,$depth)= @_;
   }
   return $res;
 }
+sub calc_globals{ my ($fnst)= @_;
+  my $vars={};
+  for my $a (@{$$fnst[2]}){
+    $$vars{$$a[1]}=-1;
+  }
+  $vars=calc_vars($$fnst[3],$vars);
+  my $glo=[];
+  for my $name (@{hkeys($vars)}){
+    if($$vars{$name}>0){
+      apush($glo,$name);
+    }
+  }
+  return $glo;
+}
+sub calc_vars{ my ($arr,$vars)= @_;
+  if(len($arr)==0){
+    return $vars;
+  }
+  if(streq($$arr[0],'var')){
+    my $name=$$arr[1];
+    if(!haskey($name,$vars)){
+      $$vars{$name}=1;
+    }
+  }
+  elsif(streq($$arr[0],'def')){
+    my $name=(streq($$arr[1][0],'var'))?$$arr[1][1]:$$arr[1][1][1];
+    $$vars{$name}=-1;
+  }
+  else{
+    for my $x (@{$arr}){
+      if(isarray($x)){
+        $vars=calc_vars($x,$vars);
+      }
+    }
+  }
+  return $vars;
+}
 sub call_to_str{ my ($expr)= @_;
   my $name=$$expr[1];
   my $definition=getwdef($lib,$name,'');
@@ -523,7 +560,7 @@ sub def_to_str{ my ($expr)= @_;
   my $kw=getwdef($spc,'var_def','');
   if(streq($kw,'')){
     if($noinit){
-      return 0;
+      return '';
     }
   }
   else{
@@ -591,6 +628,10 @@ sub fn_to_str{ my ($st,$depth)= @_;
   for my $a (@{$$st[2]}){
     apush($args,getwdef($spc,'var_start','') . $$a[1]);
   }
+  my $globals=calc_globals($st);
+  if(len($globals)>0&&match($$spc{'lang'},'php|py')){
+    aunshift($$st[3],['global',$globals]);
+  }
   $args='(' . ajoin(',',$args) . ')';
   my $res=$$spc{'fn_def'} . ' ' . $$st[1];
   my $block=block_to_str($$st[3],$depth);
@@ -621,6 +662,10 @@ sub getwdef{ my ($h,$k,$d)= @_;
     return $$h{$k};
   }
   return $d;
+}
+sub globals_to_str{ my ($names)= @_;
+  my $vs=getwdef($spc,'var_start','');
+  return 'global ' . $vs . ajoin(',' . $vs,$names);
 }
 sub hash_to_str{ my ($expr)= @_;
   my $lbr=getwdef($spc,'hash_lit_quote','{');
@@ -687,13 +732,19 @@ sub stmt_to_str{ my ($st,$depth)= @_;
   elsif(match($$st[0],'if|elsif|else|while|for')){
     return cond_to_str($st,$depth);
   }
+  elsif(streq($$st[0],'global')){
+    return globals_to_str($$st[1]);
+  }
   return 'unknown_statement';
 }
 sub stlist_to_str{ my ($ast,$depth)= @_;
   my $res='';
   for my $st (@{$ast}){
-    $res.=repstr(' ',$depth*$indent);
-    $res.=stmt_to_str($st,$depth);
+    my $ststr=stmt_to_str($st,$depth);
+    if(streq($ststr,'')){
+      next;
+    }
+    $res.=repstr(' ',$depth*$indent) . $ststr;
     if(!streq($$st[len($st)-1],'blk')){
       $res.=';';
     }
