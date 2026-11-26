@@ -426,7 +426,7 @@ fn to_ast(code) {
     push(data, "\0");
     def ast = stlist();
     if (!eq(peek(), "\0"))
-    	err('statement expected');
+        err('statement expected');
     ret ast;
 }
 

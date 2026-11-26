@@ -130,7 +130,7 @@ fn cond_to_str(st, depth) {
         push(st, 'blk');
     def expr = st[0];
     if (eq(expr, 'for'))
-    	expr = for_head_to_str(var_to_str(st[1]), expr_to_str(st[2]));
+        expr = for_head_to_str(var_to_str(st[1]), expr_to_str(st[2]));
     elsif (!eq(expr, 'else'))
         expr = getwdef(spc, expr, expr) . '(' . expr_to_str(st[1]) . ')';
     ret expr . block_to_str(st[len(st)-2], depth);
@@ -159,18 +159,18 @@ fn expr_to_str(expr) {
         def b = expr_to_str([expr[len(expr)-1]]);
         def op = elem[1];
         if (eq(op, '.')) {
-        	op = getwdef(spc, 'concat_op', ' . ');
-        	if (eq(spc{'lang'}, 'py')) {
-        	    a = 'str(' . a . ')';
-        	    b = 'str(' . b . ')';
-        	}
+            op = getwdef(spc, 'concat_op', ' . ');
+            if (eq(spc{'lang'}, 'py')) {
+                a = 'str(' . a . ')';
+                b = 'str(' . b . ')';
+            }
         }
         ret a . getwdef(spc, op, op) . b;
     } elsif (eq(type, 'uop')) {
         def op = elem[1];
         ret getwdef(spc, op, op) . expr_to_str(elem[2]);
     } elsif(eq(type, 'tern'))
-    	ret ternary_to_str(elem);
+        ret ternary_to_str(elem);
     elsif (eq(type, 'num'))
         ret elem[1];
     elsif (eq(type, 'str'))
@@ -210,14 +210,14 @@ fn fn_to_str(st, depth) {
 }
 
 fn for_head_to_str(var, expr) {
-	def lang = spc{'lang'};
-	if (eq(lang, 'pl'))
-		ret 'for my ' . var . ' (@{' . expr . '})';
-	elsif (eq(lang, 'js'))
-		ret 'for(let ' . var . ' of ' . expr . ')';
+    def lang = spc{'lang'};
+    if (eq(lang, 'pl'))
+        ret 'for my ' . var . ' (@{' . expr . '})';
+    elsif (eq(lang, 'js'))
+        ret 'for(let ' . var . ' of ' . expr . ')';
     elsif (eq(lang, 'php'))
-    	ret 'foreach(' . expr . ' as ' . var . ')';
-   	ret 'for ' . var . ' in ' . expr;
+        ret 'foreach(' . expr . ' as ' . var . ')';
+    ret 'for ' . var . ' in ' . expr;
 }
 
 fn getwdef(h, k, d) {
@@ -243,30 +243,30 @@ fn hash_to_str(expr) {
 }
 
 fn kw1_to_str(expr) {
-	def res = expr[1];
-	res = getwdef(spc, res, res);
-	res = getwdef(kw1map, res, res);
+    def res = expr[1];
+    res = getwdef(spc, res, res);
+    res = getwdef(kw1map, res, res);
     if (len(expr) > 2)
         res .= ' ' . expr_to_str(expr[2]);
     ret res;
 }
 
 fn lit_to_str(elem) {
-	def q1 = '"';
-	def q2 = q1;
-	if (eq(elem[2], "'")) {
-		def backslashed = match(elem[1], '\\\\');
-		if (eq(spc{'lang'}, 'py') && backslashed)
-			q1 = ' r"';
-		elsif (eq(spc{'lang'}, 'js') && backslashed) {
-			q1 = ' String.raw`';
-			q2 = '`';
-		} else {
-			q1 = "'";
-			q2 = "'";
-		}
-	}
-	ret q1 . elem[1] . q2;
+    def q1 = '"';
+    def q2 = q1;
+    if (eq(elem[2], "'")) {
+        def backslashed = match(elem[1], '\\\\');
+        if (eq(spc{'lang'}, 'py') && backslashed)
+            q1 = ' r"';
+        elsif (eq(spc{'lang'}, 'js') && backslashed) {
+            q1 = ' String.raw`';
+            q2 = '`';
+        } else {
+            q1 = "'";
+            q2 = "'";
+        }
+    }
+    ret q1 . elem[1] . q2;
 }
 
 fn repstr(s, n) {
@@ -311,12 +311,12 @@ fn stlist_to_str(ast, depth) {
 }
 
 fn ternary_to_str(expr) {
-	def cond = expr_to_str(expr[1]);
-	def yes = expr_to_str(expr[2]);
-	def no = expr_to_str(expr[3]);
-	if (!eq(spc{'lang'}, 'py'))
-		ret cond . '?' . yes . ':' . no;
-	ret yes . ' if ' . cond . ' else ' . no;
+    def cond = expr_to_str(expr[1]);
+    def yes = expr_to_str(expr[2]);
+    def no = expr_to_str(expr[3]);
+    if (!eq(spc{'lang'}, 'py'))
+        ret cond . '?' . yes . ':' . no;
+    ret yes . ' if ' . cond . ' else ' . no;
 }
 
 fn var_to_str(elem) {
