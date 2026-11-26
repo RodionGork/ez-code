@@ -40,7 +40,7 @@ def specific = {
         'hash_arrow': ':',
         'fn_def': 'def',
         'elsif': 'elif',
-        'header': "import math\n"
+        'header': "import math;import os;import sys;import re\n"
     }
 };
 

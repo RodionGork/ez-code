@@ -1,0 +1,20 @@
+fn somemsg() {
+    writeln('some message');
+}
+
+fn sqr(x) {
+    ret x*x;
+}
+
+fn pwr(a, b) {
+    def res = 1;
+    while (b>0) {
+        res *= a;
+        b -= 1;
+    }
+    ret res;
+}
+
+callname('somemsg', []);
+writeln(callname('sqr', [9]));
+writeln(callname('pwr', [3, 6]));

@@ -4,6 +4,8 @@ writeln(match(a, 'l') ? 'ok' : 'no');
 writeln(subst(a, '[la]', 'x'));
 writeln(subst(a, 'x', 'y'));
 
+writeln(int(3.5), ' ', int(-3.5));
+
 def h = {'zlo':'paka', 'bla':'mla', 'mla':'muh', 'one':1};
 writeln(haskey('zlo', h) ? 'yes' : 'no');
 writeln(join(',',sort(keys(h))));
