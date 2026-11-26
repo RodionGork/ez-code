@@ -1,0 +1,21 @@
+def a = 'bla';
+writeln(eq('bla', a) ? 'yes' : 'no');
+writeln(match(a, 'l') ? 'ok' : 'no');
+writeln(subst(a, '[la]', 'x'));
+writeln(subst(a, 'x', 'y'));
+
+def h = {'zlo':'paka', 'bla':'mla', 'mla':'muh', 'one':1};
+writeln(haskey('zlo', h) ? 'yes' : 'no');
+writeln(join(',',sort(keys(h))));
+
+def y = [3,5,8];
+push(y, '*');
+writeln(join('-', slice(y, 1, 2)));
+for (t : [a, h, y])
+    writeln(isarray(t) ? 'arr' : 'no');
+writeln(shift(y), ' ', len(y));
+unshift(y, pop(y));
+writeln(join('', y));
+writeln(join('-', split('\s', 'mama myla ramu')));
+writeln(join(':', split('\s', 'masha yela kashu', 2)));
+writeln(scmp('baa','ba'),scmp('aba','baa'));
