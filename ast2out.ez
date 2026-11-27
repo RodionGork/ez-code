@@ -109,7 +109,8 @@ fn call_to_str(expr) {
     if (!eq(definition, '')) {
         if (!eq(definition[0], ''))
             definition[2] = 1;
-        name = definition[1];
+        if (!eq(definition[1], ''))
+            name = definition[1];
     }
     def res = name . '(';
     if (len(expr[2]) != 0) {
@@ -335,21 +336,18 @@ fn var_to_str(elem) {
     ret res;
 }
 
-fn ast_to_str(ast, lang, ind, noprefix) {
+fn ast_to_str(ast, lang, ind, libhdr) {
     indent = ind;
     spc = specific{lang};
     lib = funclib(lang);
-    def libkeys = sort(keys(lib));
-    for (fname : libkeys) {
-        if (!isarray(lib{fname}))
-            lib{fname} = [lib{fname}, fname];
-        push(lib{fname}, 0);
-    }
     def prefix = getwdef(spc, 'header', '');
     def code = stlist_to_str(ast, 0);
-    for (fname : libkeys) {
-        if (lib{fname}[2] && !noprefix)
-            prefix .= lib{fname}[0] . "\n";
+    if (libhdr) {
+        for (fname : sort(keys(lib))) {
+            def row = lib{fname};
+            if (!eq(row[0], '') && (lib{fname}[2] || libhdr > 1))
+                prefix .= lib{fname}[0] . "\n";
+        }
     }
     ret prefix . code;
 }

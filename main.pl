@@ -7,21 +7,17 @@ use File::Basename;
 use lib dirname(__FILE__);
 require 'ez-gen.pl';
 
-my $lf = funclib('pl');
-for my $fname (keys %$lf) {
-    my $s = $$lf{$fname};
-    eval(ref($s) eq 'ARRAY' ? $$s[0] : $s);
-}
-
 my @args = ();
-my $bare = 0;
+my $libhdr = 1;
 my $autorun = 0;
 my $outlang = 's';
 for my $a (@ARGV) {
     if ($a =~ /\-(js|pl|php|py|ast)/) {
         $outlang = $1;
     } elsif ($a eq '-bare') {
-        $bare = 1;
+        $libhdr = 0;
+    } elsif ($a eq '-lib') {
+        $libhdr = 2
     } elsif ($a eq '-run') {
         $autorun = 1;
     } else {
@@ -49,7 +45,7 @@ if ($outlang eq '') {
 
 $outlang = 'pl' unless $outlang =~ 'pl|js|php|py';
 
-my $code = ast_to_str($ast, $outlang, 2, $autorun || $bare);
+my $code = ast_to_str($ast, $outlang, 2, $autorun ? 0 : $libhdr);
 if ($autorun) {
     eval($code);
     if ($@) {
