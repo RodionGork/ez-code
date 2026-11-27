@@ -5,7 +5,7 @@ use warnings;
 use JSON::PP;
 use File::Basename;
 use lib dirname(__FILE__);
-require 'ez-gen.pl';
+require 'generated/ez-code.pl';
 
 my @args = ();
 my $libhdr = 1;

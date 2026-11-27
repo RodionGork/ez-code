@@ -1,19 +1,32 @@
 //generated file, don't edit directly
-let flib={'pl':{'callname': String.raw`sub callname{(\&{$_[0]})->(@{$_[1]});}`,'eq':['sub streq{$_[0] eq $_[1];}','streq'],'halt':'sub halt{say($_[1]);exit($_[0]);}','haskey':'sub haskey{defined $_[1]->{$_[0]};}','isarray':'sub isarray{ref($_[0]) eq "ARRAY";}','join':['sub ajoin{join $_[0], @{$_[1]}}','ajoin'],'keys':[ String.raw`sub hkeys{my @res = keys(%{$_[0]}); \@res;}`,'hkeys'],'len':'sub len{scalar @{$_[0]};}','match':'sub match{$_[0] =~ qr/$_[1]/;}','pop':['sub apop{pop @{$_[0]};}','apop'],'push':['sub apush{push @{$_[0]}, $_[1];}','apush'],'scmp':'sub scmp{$_[0] cmp $_[1];}','slice': String.raw`sub slice{my @res = @{$_[0]}[$_[1] .. $_[2]];\@res;}`,'shift':['sub ashift{shift @{$_[0]};}','ashift'],'sort':[ String.raw`sub asort{my @res = sort @{$_[0]};\@res;}`,'asort'],'split':[ String.raw`sub asplit{my @res = split($_[0],$_[1],($_[2]//0)); \@res;}`,'asplit'],'subst':'sub subst{$_[0] =~ s/$_[1]/$_[2]/rg;}','unshift':['sub aunshift{unshift @{$_[0]}, $_[1];}','aunshift'],'writeln':'sub writeln{say(@_);}',},'js':{'atan2':'function atan2(a,b){return Math.atan2(a,b)}','callname':'function callname(f,a){return eval(f)(...a);}','eq':'function eq(a,b){return a == b}','halt':'function halt(c,m){throw new Error(m)}','haskey':'function haskey(k,o){return Object.hasOwn(o,k)}','int':'function int(x){return Math.trunc(x)}','isarray':'function isarray(a){return Array.isArray(a)}','join':'function join(sep,a){return a.join(sep)}','keys':['','Object.keys'],'len':'function len(a){return a.length}','match':'function match(s,r){return s.match(new RegExp(r))!==null}','pop':'function pop(a){return a.pop()}','push':'function push(a,x){a.push(x)}','scmp':'function scmp(a,b){return a.localeCompare(b)}','slice':'function slice(a,s,e){return a.slice(s,e+1)}','shift':'function shift(a){return a.shift()}','sort':'function sort(a){return a.toSorted()}','split':'function split(sep,a,lim){if(arguments.length<3)return a.split(new RegExp(sep));let r=[];while(--lim){let m=a.match(sep);r.push(a.slice(0,m.index));a=a.slice(m.index+m[0].length)}r.push(a);return r}','subst':'function subst(a,p,s){return a.replace(new RegExp(p,"g"),s)}','unshift':'function unshift(a,e){a.unshift(e)}','writeln':'function writeln(..._){console.log(_.join(""))}',},'php':{'callname':'function callname($f,$a){return call_user_func($f,...$a);}','eq':'function eq($a,$b){return $a==$b;}','halt': String.raw`function halt($c,$m){echo "$m\n";exit($c);}`,'haskey':['','array_key_exists'],'int':['','intval'],'isarray':'function isarray($a){return is_array($a)&&array_is_list($a);}','join':['','implode'],'keys':['','array_keys'],'len':['','count'],'match':['function smatch($s,$r){return preg_match("/$r/",$s);}','smatch'],'pop':['','array_pop'],'push':['','array_push'],'scmp':['','strcmp'],'slice':['','array_slice'],'shift':['','array_shift'],'sort':['function ipsort($a){$res=$a;sort($res);return $res;}','ipsort'],'split':'function split($sep,$a,$lim=0){return preg_split("/$sep/",$a,$lim);}','subst':'function subst($a,$r,$s){return preg_replace("/$r/",$s,$a);}','unshift':['','array_unshift'],'writeln': String.raw`function writeln(...$args){echo implode("", $args)."\n";}`,},'py':{'atan2':'def atan2(a,b): return math.atan2(a,b)','callname':'def callname(f,a):return eval(f)(*a)','eq':'def eq(a,b):return str(a)==str(b)','halt':'def halt(c,m):print(m);sys.exit(c)','haskey':'def haskey(k,d):return k in d','isarray':'def isarray(a):return isinstance(a,list)','join':'def join(s,a):return s.join([str(x) for x in a])','keys':'def keys(a):return a.keys()','push':'def push(a,x):a.append(x)','match':'def match(s,r):return re.search(r,s)','pop':'def pop(a):return a.pop()','push':'def push(a,x):a.append(x)','scmp':'def scmp(a,b):return (a>b)-(a<b)','slice':'def slice(a,s,e):return a[s:e+1]','shift':'def shift(a):return a.pop(0)','sort':['','sorted'],'split':'def split(r,a,lim=1):return re.split(r,a,lim-1)','subst':'def subst(a,r,s):return re.sub(r,s,a)','unshift':'def unshift(a,x):a.insert(0,x)','writeln':'def writeln(*args): print(*args, sep="")',},};
-function funclib(lang){
-  return flib[lang];
-}
+function atan2(a,b){return Math.atan2(a,b)}
 function callname(f,a){return eval(f)(...a);}
 function eq(a,b){return a == b}
 function halt(c,m){throw new Error(m)}
 function haskey(k,o){return Object.hasOwn(o,k)}
+function int(x){return Math.trunc(x)}
+function isarray(a){return Array.isArray(a)}
 function join(sep,a){return a.join(sep)}
 function len(a){return a.length}
 function match(s,r){return s.match(new RegExp(r))!==null}
+function pop(a){return a.pop()}
 function push(a,x){a.push(x)}
+function scmp(a,b){return a.localeCompare(b)}
+function shift(a){return a.shift()}
+function slice(a,s,e){return a.slice(s,e+1)}
+function sort(a){return a.toSorted()}
 function split(sep,a,lim){if(arguments.length<3)return a.split(new RegExp(sep));let r=[];while(--lim){let m=a.match(sep);r.push(a.slice(0,m.index));a=a.slice(m.index+m[0].length)}r.push(a);return r}
 function subst(a,p,s){return a.replace(new RegExp(p,"g"),s)}
 function unshift(a,e){a.unshift(e)}
+function writeln(..._){console.log(_.join(""))}
+let flib={'pl':[['callname', String.raw`sub callname{(\&{$_[0]})->(@{$_[1]});}`,''],['eq','sub streq{$_[0] eq $_[1];}','streq'],['halt','sub halt{say($_[1]);exit($_[0]);}',''],['haskey','sub haskey{defined $_[1]->{$_[0]};}',''],['isarray','sub isarray{ref($_[0]) eq "ARRAY";}',''],['join','sub ajoin{join $_[0], @{$_[1]}}','ajoin'],['keys', String.raw`sub hkeys{my @res = keys(%{$_[0]}); \@res;}`,'hkeys'],['len','sub len{scalar @{$_[0]};}',''],['match','sub match{$_[0] =~ qr/$_[1]/;}',''],['pop','sub apop{pop @{$_[0]};}','apop'],['push','sub apush{push @{$_[0]}, $_[1];}','apush'],['scmp','sub scmp{$_[0] cmp $_[1];}',''],['slice', String.raw`sub slice{my @res = @{$_[0]}[$_[1] .. $_[2]];\@res;}`,''],['shift','sub ashift{shift @{$_[0]};}','ashift'],['sort', String.raw`sub asort{my @res = sort @{$_[0]};\@res;}`,'asort'],['split', String.raw`sub asplit{my @res = split($_[0],$_[1],($_[2]//0)); \@res;}`,'asplit'],['subst','sub subst{$_[0] =~ s/$_[1]/$_[2]/rg;}',''],['unshift','sub aunshift{unshift @{$_[0]}, $_[1];}','aunshift'],['writeln','sub writeln{say(@_);}','']],'js':[['atan2','function atan2(a,b){return Math.atan2(a,b)}',''],['callname','function callname(f,a){return eval(f)(...a);}',''],['eq','function eq(a,b){return a == b}',''],['halt','function halt(c,m){throw new Error(m)}',''],['haskey','function haskey(k,o){return Object.hasOwn(o,k)}',''],['int','function int(x){return Math.trunc(x)}',''],['isarray','function isarray(a){return Array.isArray(a)}',''],['join','function join(sep,a){return a.join(sep)}',''],['keys','','Object.keys'],['len','function len(a){return a.length}',''],['match','function match(s,r){return s.match(new RegExp(r))!==null}',''],['pop','function pop(a){return a.pop()}',''],['push','function push(a,x){a.push(x)}',''],['scmp','function scmp(a,b){return a.localeCompare(b)}',''],['slice','function slice(a,s,e){return a.slice(s,e+1)}',''],['shift','function shift(a){return a.shift()}',''],['sort','function sort(a){return a.toSorted()}',''],['split','function split(sep,a,lim){if(arguments.length<3)return a.split(new RegExp(sep));let r=[];while(--lim){let m=a.match(sep);r.push(a.slice(0,m.index));a=a.slice(m.index+m[0].length)}r.push(a);return r}',''],['subst','function subst(a,p,s){return a.replace(new RegExp(p,"g"),s)}',''],['unshift','function unshift(a,e){a.unshift(e)}',''],['writeln','function writeln(..._){console.log(_.join(""))}','']],'php':[['callname','function callname($f,$a){return call_user_func($f,...$a);}',''],['eq','function eq($a,$b){return $a==$b;}',''],['halt', String.raw`function halt($c,$m){echo "$m\n";exit($c);}`,''],['haskey','','array_key_exists'],['int','','intval'],['isarray','function isarray($a){return is_array($a)&&array_is_list($a);}',''],['join','','implode'],['keys','','array_keys'],['len','','count'],['match','function smatch($s,$r){return preg_match("/$r/",$s);}','smatch'],['pop','','array_pop'],['push','','array_push'],['scmp','','strcmp'],['slice','','array_slice'],['shift','','array_shift'],['sort','function ipsort($a){$res=$a;sort($res);return $res;}','ipsort'],['split','function split($sep,$a,$lim=0){return preg_split("/$sep/",$a,$lim);}',''],['subst','function subst($a,$r,$s){return preg_replace("/$r/",$s,$a);}',''],['unshift','','array_unshift'],['writeln', String.raw`function writeln(...$args){echo implode("", $args)."\n";}`,'']],'py':[['atan2','def atan2(a,b): return math.atan2(a,b)',''],['callname','def callname(f,a):return eval(f)(*a)',''],['eq','def eq(a,b):return str(a)==str(b)',''],['halt','def halt(c,m):print(m);sys.exit(c)',''],['haskey','def haskey(k,d):return k in d',''],['isarray','def isarray(a):return isinstance(a,list)',''],['join','def join(s,a):return s.join([str(x) for x in a])',''],['keys','def keys(a):return a.keys()',''],['push','def push(a,x):a.append(x)',''],['match','def match(s,r):return re.search(r,s)',''],['pop','def pop(a):return a.pop()',''],['push','def push(a,x):a.append(x)',''],['scmp','def scmp(a,b):return (a>b)-(a<b)',''],['slice','def slice(a,s,e):return a[s:e+1]',''],['shift','def shift(a):return a.pop(0)',''],['sort','','sorted'],['split','def split(r,a,lim=1):return re.split(r,a,lim-1)',''],['subst','def subst(a,r,s):return re.sub(r,s,a)',''],['unshift','def unshift(a,x):a.insert(0,x)',''],['writeln','def writeln(*args): print(*args, sep="")','']],};
+function funclib(lang){
+  let res={};
+  for(let a of flib[lang]){
+    res[a[0]]=[a[1],a[2],0];
+  }
+  return res;
+}
 let kws={'def':'p_def','fn':'p_defn','while':'p_cond','if':'p_cond','else':'p_cond','elsif':'p_cond','for':'p_cond','ret':'p_onekw','break':'p_onekw','cont':'p_onekw',};
 let data;
 let cur=0;
@@ -461,19 +474,6 @@ function to_ast(code){
   }
   return ast;
 }
-function eq(a,b){return a == b}
-function halt(c,m){throw new Error(m)}
-function haskey(k,o){return Object.hasOwn(o,k)}
-function isarray(a){return Array.isArray(a)}
-function join(sep,a){return a.join(sep)}
-function len(a){return a.length}
-function match(s,r){return s.match(new RegExp(r))!==null}
-function push(a,x){a.push(x)}
-function slice(a,s,e){return a.slice(s,e+1)}
-function sort(a){return a.toSorted()}
-function split(sep,a,lim){if(arguments.length<3)return a.split(new RegExp(sep));let r=[];while(--lim){let m=a.match(sep);r.push(a.slice(0,m.index));a=a.slice(m.index+m[0].length)}r.push(a);return r}
-function subst(a,p,s){return a.replace(new RegExp(p,"g"),s)}
-function unshift(a,e){a.unshift(e)}
 let lib;
 let spc;
 let indent;
@@ -549,7 +549,9 @@ function call_to_str(expr){
     if(!eq(definition[0],'')){
       definition[2]=1;
     }
-    name=definition[1];
+    if(!eq(definition[1],'')){
+      name=definition[1];
+    }
   }
   let res=name+'(';
   if(len(expr[2])!=0){
@@ -800,22 +802,18 @@ function var_to_str(elem){
   }
   return res;
 }
-function ast_to_str(ast,lang,ind,noprefix){
+function ast_to_str(ast,lang,ind,libhdr){
   indent=ind;
   spc=specific[lang];
   lib=funclib(lang);
-  let libkeys=sort(Object.keys(lib));
-  for(let fname of libkeys){
-    if(!isarray(lib[fname])){
-      lib[fname]=[lib[fname],fname];
-    }
-    push(lib[fname],0);
-  }
   let prefix=getwdef(spc,'header','');
   let code=stlist_to_str(ast,0);
-  for(let fname of libkeys){
-    if(lib[fname][2]&&!noprefix){
-      prefix+=lib[fname][0]+"\n";
+  if(libhdr){
+    for(let fname of sort(Object.keys(lib))){
+      let row=lib[fname];
+      if(!eq(row[0],'')&&(lib[fname][2]||libhdr>1)){
+        prefix+=lib[fname][0]+"\n";
+      }
     }
   }
   return prefix+code;

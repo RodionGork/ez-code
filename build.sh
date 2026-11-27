@@ -1,6 +1,16 @@
+lang=$1
+if [ "$lang" = "" ]; then
+    lang="pl"
+fi
+
 files=("funclib" "ez2ast" "ast2out")
 
-result="#generated file, don't edit directly"
+comment="#"
+if [ $lang = "js" ]; then
+    comment="//"
+fi
+
+result="${comment}generated file, don't edit directly"
 
 libs="-lib"
 
@@ -10,7 +20,7 @@ for f in "${files[@]}"; do
         echo "$f: tabs detected"
         exit 2
     fi
-    output=$(./main.pl $f.ez $libs)
+    output=$(./main.pl $f.ez -$lang $libs)
     if [ "$?" != "0" ]; then
         echo "$f: $output"
         exit 1
@@ -19,4 +29,4 @@ for f in "${files[@]}"; do
     libs="-bare"
 done
 
-echo "$result" > ez-gen.pl
+echo "$result" > generated/ez-code.$lang

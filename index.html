@@ -24,14 +24,14 @@ or
 <button id="runjs">Run (JS)</button>
 <br/><br/>
 <textarea id="output" disabled="1" cols="80" rows="20"></textarea>
-<script src="./ez-gen.js"></script>
+<script src="./generated/ez-code.js"></script>
 <script>
 function translate() {
   let src = document.getElementById('source').value;
   let lang = document.getElementById('lang').value;
   try {
     let ast = to_ast(src);
-    let out = ast_to_str(ast, lang, 2, false);
+    let out = ast_to_str(ast, lang, 2, 1);
     document.getElementById('output').value = out;
   } catch(error) {
     document.getElementById('output').value = error.message;
