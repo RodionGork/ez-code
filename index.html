@@ -37,10 +37,17 @@ function translate() {
     document.getElementById('output').value = error.message;
   }
 }
+function myconsole(...args) {
+  document.getElementById('output').value += args.join(' ') + '\n';
+}
 function runjs() {
+  console.log = myconsole;
   document.getElementById('lang').value = 'js';
   translate();
-  eval(document.getElementById('output').value);
+  let out = document.getElementById('output');
+  let code = out.value;
+  out.value = '';
+  eval(code);
 }
 document.getElementById('translatebtn').onclick=translate;
 document.getElementById('runjs').onclick=runjs;
