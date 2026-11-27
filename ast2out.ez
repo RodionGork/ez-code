@@ -209,15 +209,15 @@ fn fn_to_str(st, depth) {
     ret res . block; 
 }
 
-fn for_head_to_str(var, expr) {
+fn for_head_to_str(v, expr) {
     def lang = spc{'lang'};
     if (eq(lang, 'pl'))
-        ret 'for my ' . var . ' (@{' . expr . '})';
+        ret 'for my ' . v . ' (@{' . expr . '})';
     elsif (eq(lang, 'js'))
-        ret 'for(let ' . var . ' of ' . expr . ')';
+        ret 'for(let ' . v . ' of ' . expr . ')';
     elsif (eq(lang, 'php'))
-        ret 'foreach(' . expr . ' as ' . var . ')';
-    ret 'for ' . var . ' in ' . expr;
+        ret 'foreach(' . expr . ' as ' . v . ')';
+    ret 'for ' . v . ' in ' . expr;
 }
 
 fn getwdef(h, k, d) {

@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+  <title>EZ-Code Sandbox</title>
+  <style>
+    body {font-family:sans serif}
+  </style>
+</head>
+<body>
+<center>
+<h1>EZ-Code Sandbox</h1>
+<p>Small scripting language which translates (compiles, or "transpiles") to Perl, JS, PHP or Python.<br/>
+<a href="https://github.com/rodiongork/ez-code">https://github.com/rodiongork/ez-code</a></p>
+<textarea id="source" cols="80" rows="20"></textarea>
+<br/><br/>
+<select id="lang">
+<option value="pl">Perl</option>
+<option value="js">JavaScript</option>
+<option value="php">PHP</option>
+<option value="py">Python</option>
+</select>
+<button id="translatebtn">Translate!</button>
+or
+<button id="runjs">Run (JS)</button>
+<br/><br/>
+<textarea id="output" disabled="1" cols="80" rows="20"></textarea>
+<script src="./ez-gen.js"></script>
+<script>
+function translate() {
+  let src = document.getElementById('source').value;
+  let lang = document.getElementById('lang').value;
+  try {
+    let ast = to_ast(src);
+    let out = ast_to_str(ast, lang, 2, false);
+    document.getElementById('output').value = out;
+  } catch(error) {
+    document.getElementById('output').value = error.message;
+  }
+}
+function runjs() {
+  document.getElementById('lang').value = 'js';
+  translate();
+  eval(document.getElementById('output').value);
+}
+document.getElementById('translatebtn').onclick=translate;
+document.getElementById('runjs').onclick=runjs;
+</script>
+</body>
+</html>

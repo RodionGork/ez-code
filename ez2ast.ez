@@ -180,11 +180,11 @@ fn p_cond(kw, prev) {
 
 fn p_def() {
     p_space();
-    def var = p_var(p_word());
+    def v = p_var(p_word());
     p_space();
     if (eq(peek(), '='))
-        var = p_asgn(var);
-    ret ['def', var];
+        v = p_asgn(v);
+    ret ['def', v];
 }
 
 fn p_defn() {
@@ -371,17 +371,17 @@ fn p_var(name) {
 }
 
 fn p_var_indexed(name) {
-    def var = p_var(name);
+    def v = p_var(name);
     while (match(peek(), '[\[\{]')) {
         def quote = adv();
         p_space();
-        push(var, [quote, p_expr()]);
+        push(v, [quote, p_expr()]);
         p_space();
         quote = chr(ord(quote)+2);
         if (!eq(adv(), quote))
             err('expected '. quote . ' after index expression');
     }
-    ret var;
+    ret v;
 }
 
 fn p_word() {
@@ -422,6 +422,8 @@ fn stlist() {
 }
 
 fn to_ast(code) {
+    cur = 0;
+    pos = [1, 1];
     data = split('', code);
     push(data, "\0");
     def ast = stlist();

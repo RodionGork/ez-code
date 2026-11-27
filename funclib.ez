@@ -24,7 +24,7 @@ def flib = {
         'atan2': 'function atan2(a,b){return Math.atan2(a,b)}',
         'callname': 'function callname(f,a){return eval(f)(...a);}',
         'eq': 'function eq(a,b){return a == b}',
-        'halt': 'function halt(c,m){throw new Error(m))}',
+        'halt': 'function halt(c,m){throw new Error(m)}',
         'haskey': 'function haskey(k,o){return Object.hasOwn(o,k)}',
         'int': 'function int(x){return Math.trunc(x)}',
         'isarray': 'function isarray(a){return Array.isArray(a)}',

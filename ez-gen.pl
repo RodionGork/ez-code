@@ -1,6 +1,6 @@
 #generated file, don't edit directly
 use v5.16;use warnings;
-my $flib={'pl'=>{'callname'=>'sub callname{(\&{$_[0]})->(@{$_[1]});}','eq'=>['sub streq{$_[0] eq $_[1];}','streq'],'halt'=>'sub halt{say($_[1]);exit($_[0]);}','haskey'=>'sub haskey{defined $_[1]->{$_[0]};}','isarray'=>'sub isarray{ref($_[0]) eq "ARRAY";}','join'=>['sub ajoin{join $_[0], @{$_[1]}}','ajoin'],'keys'=>['sub hkeys{my @res = keys(%{$_[0]}); \@res;}','hkeys'],'len'=>'sub len{scalar @{$_[0]};}','match'=>'sub match{$_[0] =~ qr/$_[1]/;}','pop'=>['sub apop{pop @{$_[0]};}','apop'],'push'=>['sub apush{push @{$_[0]}, $_[1];}','apush'],'scmp'=>'sub scmp{$_[0] cmp $_[1];}','slice'=>'sub slice{my @res = @{$_[0]}[$_[1] .. $_[2]];\@res;}','shift'=>['sub ashift{shift @{$_[0]};}','ashift'],'sort'=>['sub asort{my @res = sort @{$_[0]};\@res;}','asort'],'split'=>['sub asplit{my @res = split($_[0],$_[1],($_[2]//0)); \@res;}','asplit'],'subst'=>'sub subst{$_[0] =~ s/$_[1]/$_[2]/rg;}','unshift'=>['sub aunshift{unshift @{$_[0]}, $_[1];}','aunshift'],'writeln'=>'sub writeln{say(@_);}',},'js'=>{'atan2'=>'function atan2(a,b){return Math.atan2(a,b)}','callname'=>'function callname(f,a){return eval(f)(...a);}','eq'=>'function eq(a,b){return a == b}','halt'=>'function halt(c,m){throw new Error(m))}','haskey'=>'function haskey(k,o){return Object.hasOwn(o,k)}','int'=>'function int(x){return Math.trunc(x)}','isarray'=>'function isarray(a){return Array.isArray(a)}','join'=>'function join(sep,a){return a.join(sep)}','keys'=>['','Object.keys'],'len'=>'function len(a){return a.length}','match'=>'function match(s,r){return s.match(new RegExp(r))!==null}','pop'=>'function pop(a){return a.pop()}','push'=>'function push(a,x){a.push(x)}','scmp'=>'function scmp(a,b){return a.localeCompare(b)}','slice'=>'function slice(a,s,e){return a.slice(s,e+1)}','shift'=>'function shift(a){return a.shift()}','sort'=>'function sort(a){return a.toSorted()}','split'=>'function split(sep,a,lim){if(arguments.length<3)return a.split(new RegExp(sep));let r=[];while(--lim){let m=a.match(sep);r.push(a.slice(0,m.index));a=a.slice(m.index+m[0].length)}r.push(a);return r}','subst'=>'function subst(a,p,s){return a.replace(new RegExp(p,"g"),s)}','unshift'=>'function unshift(a,e){a.unshift(e)}','writeln'=>'function writeln(..._){console.log(_.join(""))}',},'php'=>{'callname'=>'function callname($f,$a){return call_user_func($f,...$a);}','eq'=>'function eq($a,$b){return $a==$b;}','halt'=>'function halt($c,$m){echo "$m\n";exit($c);}','haskey'=>['','array_key_exists'],'int'=>['','intval'],'isarray'=>'function isarray($a){return is_array($a)&&array_is_list($a);}','join'=>['','implode'],'keys'=>['','array_keys'],'len'=>['','count'],'match'=>['function smatch($s,$r){return preg_match("/$r/",$s);}','smatch'],'pop'=>['','array_pop'],'push'=>['','array_push'],'scmp'=>['','strcmp'],'slice'=>['','array_slice'],'shift'=>['','array_shift'],'sort'=>['function ipsort($a){$res=$a;sort($res);return $res;}','ipsort'],'split'=>'function split($sep,$a,$lim=0){return preg_split("/$sep/",$a,$lim);}','subst'=>'function subst($a,$r,$s){return preg_replace("/$r/",$s,$a);}','unshift'=>['','array_unshift'],'writeln'=>'function writeln(...$args){echo implode("", $args)."\n";}',},'py'=>{'atan2'=>'def atan2(a,b): return math.atan2(a,b)','callname'=>'def callname(f,a):return eval(f)(*a)','eq'=>'def eq(a,b):return str(a)==str(b)','halt'=>'def halt(c,m):print(m);sys.exit(c)','haskey'=>'def haskey(k,d):return k in d','isarray'=>'def isarray(a):return isinstance(a,list)','join'=>'def join(s,a):return s.join([str(x) for x in a])','keys'=>'def keys(a):return a.keys()','push'=>'def push(a,x):a.append(x)','match'=>'def match(s,r):return re.search(r,s)','pop'=>'def pop(a):return a.pop()','push'=>'def push(a,x):a.append(x)','scmp'=>'def scmp(a,b):return (a>b)-(a<b)','slice'=>'def slice(a,s,e):return a[s:e+1]','shift'=>'def shift(a):return a.pop(0)','sort'=>['','sorted'],'split'=>'def split(r,a,lim=1):return re.split(r,a,lim-1)','subst'=>'def subst(a,r,s):return re.sub(r,s,a)','unshift'=>'def unshift(a,x):a.insert(0,x)','writeln'=>'def writeln(*args): print(*args, sep="")',},};
+my $flib={'pl'=>{'callname'=>'sub callname{(\&{$_[0]})->(@{$_[1]});}','eq'=>['sub streq{$_[0] eq $_[1];}','streq'],'halt'=>'sub halt{say($_[1]);exit($_[0]);}','haskey'=>'sub haskey{defined $_[1]->{$_[0]};}','isarray'=>'sub isarray{ref($_[0]) eq "ARRAY";}','join'=>['sub ajoin{join $_[0], @{$_[1]}}','ajoin'],'keys'=>['sub hkeys{my @res = keys(%{$_[0]}); \@res;}','hkeys'],'len'=>'sub len{scalar @{$_[0]};}','match'=>'sub match{$_[0] =~ qr/$_[1]/;}','pop'=>['sub apop{pop @{$_[0]};}','apop'],'push'=>['sub apush{push @{$_[0]}, $_[1];}','apush'],'scmp'=>'sub scmp{$_[0] cmp $_[1];}','slice'=>'sub slice{my @res = @{$_[0]}[$_[1] .. $_[2]];\@res;}','shift'=>['sub ashift{shift @{$_[0]};}','ashift'],'sort'=>['sub asort{my @res = sort @{$_[0]};\@res;}','asort'],'split'=>['sub asplit{my @res = split($_[0],$_[1],($_[2]//0)); \@res;}','asplit'],'subst'=>'sub subst{$_[0] =~ s/$_[1]/$_[2]/rg;}','unshift'=>['sub aunshift{unshift @{$_[0]}, $_[1];}','aunshift'],'writeln'=>'sub writeln{say(@_);}',},'js'=>{'atan2'=>'function atan2(a,b){return Math.atan2(a,b)}','callname'=>'function callname(f,a){return eval(f)(...a);}','eq'=>'function eq(a,b){return a == b}','halt'=>'function halt(c,m){throw new Error(m)}','haskey'=>'function haskey(k,o){return Object.hasOwn(o,k)}','int'=>'function int(x){return Math.trunc(x)}','isarray'=>'function isarray(a){return Array.isArray(a)}','join'=>'function join(sep,a){return a.join(sep)}','keys'=>['','Object.keys'],'len'=>'function len(a){return a.length}','match'=>'function match(s,r){return s.match(new RegExp(r))!==null}','pop'=>'function pop(a){return a.pop()}','push'=>'function push(a,x){a.push(x)}','scmp'=>'function scmp(a,b){return a.localeCompare(b)}','slice'=>'function slice(a,s,e){return a.slice(s,e+1)}','shift'=>'function shift(a){return a.shift()}','sort'=>'function sort(a){return a.toSorted()}','split'=>'function split(sep,a,lim){if(arguments.length<3)return a.split(new RegExp(sep));let r=[];while(--lim){let m=a.match(sep);r.push(a.slice(0,m.index));a=a.slice(m.index+m[0].length)}r.push(a);return r}','subst'=>'function subst(a,p,s){return a.replace(new RegExp(p,"g"),s)}','unshift'=>'function unshift(a,e){a.unshift(e)}','writeln'=>'function writeln(..._){console.log(_.join(""))}',},'php'=>{'callname'=>'function callname($f,$a){return call_user_func($f,...$a);}','eq'=>'function eq($a,$b){return $a==$b;}','halt'=>'function halt($c,$m){echo "$m\n";exit($c);}','haskey'=>['','array_key_exists'],'int'=>['','intval'],'isarray'=>'function isarray($a){return is_array($a)&&array_is_list($a);}','join'=>['','implode'],'keys'=>['','array_keys'],'len'=>['','count'],'match'=>['function smatch($s,$r){return preg_match("/$r/",$s);}','smatch'],'pop'=>['','array_pop'],'push'=>['','array_push'],'scmp'=>['','strcmp'],'slice'=>['','array_slice'],'shift'=>['','array_shift'],'sort'=>['function ipsort($a){$res=$a;sort($res);return $res;}','ipsort'],'split'=>'function split($sep,$a,$lim=0){return preg_split("/$sep/",$a,$lim);}','subst'=>'function subst($a,$r,$s){return preg_replace("/$r/",$s,$a);}','unshift'=>['','array_unshift'],'writeln'=>'function writeln(...$args){echo implode("", $args)."\n";}',},'py'=>{'atan2'=>'def atan2(a,b): return math.atan2(a,b)','callname'=>'def callname(f,a):return eval(f)(*a)','eq'=>'def eq(a,b):return str(a)==str(b)','halt'=>'def halt(c,m):print(m);sys.exit(c)','haskey'=>'def haskey(k,d):return k in d','isarray'=>'def isarray(a):return isinstance(a,list)','join'=>'def join(s,a):return s.join([str(x) for x in a])','keys'=>'def keys(a):return a.keys()','push'=>'def push(a,x):a.append(x)','match'=>'def match(s,r):return re.search(r,s)','pop'=>'def pop(a):return a.pop()','push'=>'def push(a,x):a.append(x)','scmp'=>'def scmp(a,b):return (a>b)-(a<b)','slice'=>'def slice(a,s,e):return a[s:e+1]','shift'=>'def shift(a):return a.pop(0)','sort'=>['','sorted'],'split'=>'def split(r,a,lim=1):return re.split(r,a,lim-1)','subst'=>'def subst(a,r,s):return re.sub(r,s,a)','unshift'=>'def unshift(a,x):a.insert(0,x)','writeln'=>'def writeln(*args): print(*args, sep="")',},};
 sub funclib{ my ($lang)= @_;
   return $$flib{$lang};
 }
@@ -186,12 +186,12 @@ sub p_cond{ my ($kw,$prev)= @_;
 }
 sub p_def{
   p_space();
-  my $var=p_var(p_word());
+  my $v=p_var(p_word());
   p_space();
   if(streq(peek(),'=')){
-    $var=p_asgn($var);
+    $v=p_asgn($v);
   }
-  return ['def',$var];
+  return ['def',$v];
 }
 sub p_defn{
   p_space();
@@ -390,18 +390,18 @@ sub p_var{ my ($name)= @_;
   return ['var',subst($name,'^\$','')];
 }
 sub p_var_indexed{ my ($name)= @_;
-  my $var=p_var($name);
+  my $v=p_var($name);
   while(match(peek(),'[\[\{]')){
     my $quote=adv();
     p_space();
-    apush($var,[$quote,p_expr()]);
+    apush($v,[$quote,p_expr()]);
     p_space();
     $quote=chr(ord($quote)+2);
     if(!streq(adv(),$quote)){
       err('expected ' . $quote . ' after index expression');
     }
   }
-  return $var;
+  return $v;
 }
 sub p_word{
   my $w=adv();
@@ -442,6 +442,8 @@ sub stlist{
   return $res;
 }
 sub to_ast{ my ($code)= @_;
+  $cur=0;
+  $pos=[1,1];
   $data=asplit('',$code);
   apush($data,"\0");
   my $ast=stlist();
@@ -644,18 +646,18 @@ sub fn_to_str{ my ($st,$depth)= @_;
   }
   return $res . $block;
 }
-sub for_head_to_str{ my ($var,$expr)= @_;
+sub for_head_to_str{ my ($v,$expr)= @_;
   my $lang=$$spc{'lang'};
   if(streq($lang,'pl')){
-    return 'for my ' . $var . ' (@{' . $expr . '})';
+    return 'for my ' . $v . ' (@{' . $expr . '})';
   }
   elsif(streq($lang,'js')){
-    return 'for(let ' . $var . ' of ' . $expr . ')';
+    return 'for(let ' . $v . ' of ' . $expr . ')';
   }
   elsif(streq($lang,'php')){
-    return 'foreach(' . $expr . ' as ' . $var . ')';
+    return 'foreach(' . $expr . ' as ' . $v . ')';
   }
-  return 'for ' . $var . ' in ' . $expr;
+  return 'for ' . $v . ' in ' . $expr;
 }
 sub getwdef{ my ($h,$k,$d)= @_;
   if(haskey($k,$h)){
