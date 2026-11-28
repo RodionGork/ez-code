@@ -6,6 +6,8 @@ writeln(subst(a, 'x', 'y'));
 
 writeln(int(3.5), ' ', int(-3.5));
 
+writeln(chr(70), ' ', ord("M"));
+
 def h = {'zlo':'paka', 'bla':'mla', 'mla':'muh', 'one':1};
 writeln(haskey('zlo', h) ? 'yes' : 'no');
 writeln(join(',',sort(keys(h))));

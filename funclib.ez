@@ -23,6 +23,7 @@ def flib = {
     'js': [
         ['atan2', 'function atan2(a,b){return Math.atan2(a,b)}', ''],
         ['callname', 'function callname(f,a){return eval(f)(...a);}', ''],
+        ['chr', '', 'String.fromCharCode'],
         ['eq', 'function eq(a,b){return a == b}', ''],
         ['halt', 'function halt(c,m){throw new Error(m)}', ''],
         ['haskey', 'function haskey(k,o){return Object.hasOwn(o,k)}', ''],
@@ -32,6 +33,7 @@ def flib = {
         ['keys', '', 'Object.keys'],
         ['len', 'function len(a){return a.length}', ''],
         ['match', 'function match(s,r){return s.match(new RegExp(r))!==null}', ''],
+        ['ord', 'function ord(s){return s.charCodeAt(0)}', ''],
         ['pop', 'function pop(a){return a.pop()}', ''],
         ['push', 'function push(a,x){a.push(x)}', ''],
         ['scmp', 'function scmp(a,b){return a.localeCompare(b)}', ''],
