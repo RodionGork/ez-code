@@ -4,6 +4,8 @@ Attempt to create simplistic scripting language which translates easily
 to `Perl`, `PHP` or `Python` for server-side use - and to `JavaScript` for
 use in browser.
 
+[_(**demo-page**)_](https://rodiongork.github.io/ez-code)
+
 This is intended to be used for describing logic of Mud-like game, so that
 it can both work on server and be used as a JS sandbox for uses wishing to
 create their own parts of the game.
