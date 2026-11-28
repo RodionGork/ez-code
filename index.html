@@ -7,6 +7,7 @@
     #source {width:100%;height:400px;font-size:125%;border:1px solid #444;}
     #output {width:100%;border:1px solid #777;}
     .label {font-style:italic;font-weight:bold;color:#999;text-align:left;}
+    .example {color:blue;font-weight:bold;cursor:pointer;}
     .ace_keyword {font-weight:bold;}
     .ace-tm .ace_string {color: #f08;font-weight:bold;}
     .ace-tm .ace_constant.ace_numeric {color: #080;font-weight:bold;}
@@ -18,7 +19,10 @@
 <p>Small scripting language which translates (compiles, or "transpiles") to Perl, JS, PHP or Python.<br/>
 <a href="https://github.com/rodiongork/ez-code">https://github.com/rodiongork/ez-code</a></p>
 <div class="label">Source:</div>
-<div id="source"></div>
+<div id="source"># write your code here or load some example (see below)</div>
+<br/>
+<small><i>Load an example: <span class="example" onclick="example('collatz')">Collatz</span>,
+<span class="example" onclick="example('primes')">Primes</span></i></small>
 <br/><br/>
 <select id="lang">
 <option value="pl">Perl</option>

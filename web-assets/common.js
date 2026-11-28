@@ -21,6 +21,11 @@ function runjs() {
   out.value = '';
   eval(code);
 }
+async function example(name) {
+  let resp = await fetch('./tests/' + name + '.ez');
+  let data = await resp.text();
+  editor.setValue(data);
+}
 document.getElementById('translatebtn').onclick=translate;
 document.getElementById('runjs').onclick=runjs;
 ace.define("ace/mode/ez_highlight_rules", function(require, exports, module) {
